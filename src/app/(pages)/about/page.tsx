@@ -66,7 +66,7 @@ export default function AboutPage() {
           </li>
           <li>
             <Link
-              href=""
+              href="https://portfolio-gulbindev.vercel.app/"
               target="_blank"
               aria-label="Navigate to the developer's portfolio website"
             >
