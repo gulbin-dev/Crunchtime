@@ -75,8 +75,9 @@ export default async function RootLayout({
             },
           }}
         >
-          <Analytics />
           <body data-overlayscrollbars-initialize>
+            <Analytics />
+
             <Header />
             <SkeletonTheme baseColor="#bcbcbc" highlightColor="#393939">
               {children}
