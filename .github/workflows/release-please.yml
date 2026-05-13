@@ -56,7 +56,7 @@ jobs:
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ACOUNT_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-      Read_Access_Token: ${{ secrets.Read_Access_Token }}
+      Read_Access_Token: ${{ secrets.READ_ACCESS_TOKEN }}
       NEXT_PUBLIC_TMDB_BASE_URL: ${{ secrets.NEXT_PUBLIC_TMDB_BASE_URL }}
 
     steps:
@@ -73,7 +73,7 @@ jobs:
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ACOUNT_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-      Read_Access_Token: ${{ secrets.Read_Access_Token }}
+      Read_Access_Token: ${{ secrets.READ_ACCESS_TOKEN }}
       NEXT_PUBLIC_TMDB_BASE_URL: ${{ secrets.NEXT_PUBLIC_TMDB_BASE_URL }}
 
     steps:
