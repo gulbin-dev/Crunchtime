@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.1](https://github.com/gulbin-dev/Crunchtime/compare/v2.0.0...v2.0.1) (2026-05-13)
+
+
+### Bug Fixes
+
+* fix error message display ([24ce8f2](https://github.com/gulbin-dev/Crunchtime/commit/24ce8f2e9c461d792810317bf86f356a4692ff58))
+
 ## [2.0.0](https://github.com/gulbin-dev/Crunchtime/compare/v1.0.0...v2.0.0) (2026-05-13)
 
 
