@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/gulbin-dev/Crunchtime/compare/v2.0.2...v2.1.0) (2026-05-13)
+
+
+### Features
+
+* added analytics ([bb64c78](https://github.com/gulbin-dev/Crunchtime/commit/bb64c7858fbe025770ef42df7db145094cf67c16))
+
 ## [2.0.2](https://github.com/gulbin-dev/Crunchtime/compare/v2.0.1...v2.0.2) (2026-05-13)
 
 
