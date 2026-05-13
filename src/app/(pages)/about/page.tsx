@@ -23,7 +23,7 @@ export default function AboutPage() {
           src="/image/blue_short-8e7b30f73a4020692ccca9c88bafe5dcb6f8a62a4c6bc55cd9ba82bb2cd95f6c.svg"
           alt="TMDB Logo"
           width={200}
-          height={120}
+          height={25}
         />
         <p>
           This website uses{" "}
