@@ -27,7 +27,7 @@ jobs:
       - uses: googleapis/release-please-action@v4
         id: release
         with:
-          token: ${{ secrets.RELEASE_TOKEN }}
+          token: ${{ secrets.CRUNCHTIME_TOKEN }}
           target-branch: master
           release-type: node
           config-file: release-please-config.json
@@ -43,7 +43,7 @@ jobs:
       - uses: googleapis/release-please-action@v4
         id: release
         with:
-          token: ${{ secrets.RELEASE_TOKEN }}
+          token: ${{ secrets.CRUNCHTIME_TOKEN }}
           target-branch: pre-release
           release-type: node
           config-file: release-please-config.json
@@ -56,9 +56,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: npm install -g vercel@latest
-      - run: vercel pull --yes --environment=production --token=${{ secrets.CRUNCHTIME_TOKEN }}
-      - run: vercel build --prod --token=${{ secrets.CRUNCHTIME_TOKEN }}
-      - run: vercel --prod --token=${{ secrets.CRUNCHTIME_TOKEN }}
+      - run: vercel pull --yes --environment=production --token=${{ secrets.CRUNCHTIME_VERCEL_TOKEN }}
+      - run: vercel build --prod --token=${{ secrets.CRUNCHTIME_VERCEL_TOKEN }}
+      - run: vercel --prod --token=${{ secrets.CRUNCHTIME_VERCEL_TOKEN }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ACOUNT_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
@@ -70,9 +70,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: npm install -g vercel@latest
-      - run: vercel pull --yes --environment=preview --token=${{ secrets.CRUNCHTIME_TOKEN }}
-      - run: vercel build --token=${{ secrets.CRUNCHTIME_TOKEN }}
-      - run: vercel deploy --prebuilt --token=${{ secrets.CRUNCHTIME_TOKEN }}
+      - run: vercel pull --yes --environment=preview --token=${{ secrets.CRUNCHTIME_VERCEL_TOKEN }}
+      - run: vercel build --token=${{ secrets.CRUNCHTIME_VERCEL_TOKEN }}
+      - run: vercel deploy --prebuilt --token=${{ secrets.CRUNCHTIME_VERCEL_TOKEN }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ACOUNT_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
