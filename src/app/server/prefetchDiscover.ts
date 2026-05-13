@@ -8,8 +8,9 @@ export async function preFetchDiscover(request: NextRequest) {
     return NextResponse.json({ message: "Invalid request" }, { status: 400 });
   }
 
+  let response;
   try {
-    const response = await fetch(
+    response = await fetch(
       `https://api.themoviedb.org/3/discover/${mediaType}?include_adult=false&include_video=false&language=en-US&page=1&sort_by=popularity.desc&with_genres=${genre}`,
       {
         method: "GET",
@@ -33,15 +34,15 @@ export async function preFetchDiscover(request: NextRequest) {
     }
     const data = await response.json();
     return NextResponse.json(data);
-  } catch {
+  } catch (err: unknown) {
+    const error = err as Error;
     throw {
       data: undefined,
       error: {
         state: true,
-        type: "NETWORK_ERROR",
-        status: 500,
-        message:
-          "Unstable network connection, please check your internet connection",
+        type: `${error.name}`,
+        status: response?.status,
+        message: `${error.message}, please try again`,
       },
     };
   }

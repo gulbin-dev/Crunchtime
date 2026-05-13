@@ -11,8 +11,10 @@ const options = {
 export async function movieGenreList(): Promise<Response<Genres>> {
   "use cache";
   cacheLife("weeks");
+
+  let response;
   try {
-    const response = await fetch(
+    response = await fetch(
       "https://api.themoviedb.org/3/genre/movie/list",
       options,
     );
@@ -28,15 +30,15 @@ export async function movieGenreList(): Promise<Response<Genres>> {
       };
     }
     return await response.json();
-  } catch {
+  } catch (err: unknown) {
+    const error = err as Error;
     throw {
       data: undefined,
       error: {
         state: true,
-        type: "NETWORK_ERROR",
-        status: 500,
-        message:
-          "Unstable network connection, please check your internet connection",
+        type: `${error.name}`,
+        status: response?.status,
+        message: `${error.message}, please try again`,
       },
     };
   }
