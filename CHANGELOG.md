@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.2](https://github.com/gulbin-dev/Crunchtime/compare/v2.0.1...v2.0.2) (2026-05-13)
+
+
+### Bug Fixes
+
+* added two env ([7d908a4](https://github.com/gulbin-dev/Crunchtime/commit/7d908a4a36839e131dd0105473d061cd878d88a1))
+
 ## [2.0.1](https://github.com/gulbin-dev/Crunchtime/compare/v2.0.0...v2.0.1) (2026-05-13)
 
 
