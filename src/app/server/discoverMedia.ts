@@ -15,8 +15,10 @@ export async function discoverMedia(
   "use cache";
   cacheTag("weeks");
   const genre = genreParam.join("|");
+
+  let response;
   try {
-    const response = await fetch(
+    response = await fetch(
       `https://api.themoviedb.org/3/discover/${toFetch}?include_adult=false&include_video=false&language=en-US&page=1&sort_by=popularity.desc${genre !== "" ? `&with_genres=${genre}` : ""}`,
       options,
     );
@@ -32,15 +34,15 @@ export async function discoverMedia(
       };
     }
     return await response.json();
-  } catch {
+  } catch (err: unknown) {
+    const error = err as Error;
     throw {
       data: undefined,
       error: {
         state: true,
-        type: "NETWORK_ERROR",
-        status: 500,
-        message:
-          "Unstable network connection, please check your internet connection",
+        type: `${error.name}`,
+        status: response?.status,
+        message: `${error.message}, please try again`,
       },
     };
   }
