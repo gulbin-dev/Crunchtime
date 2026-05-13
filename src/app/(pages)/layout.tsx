@@ -12,6 +12,8 @@ import { movieGenreList } from "@server/movieGenres";
 import { tvGenreList } from "@server/tvGenres";
 import "react-loading-skeleton/dist/skeleton.css";
 import "@styles/globals.css";
+import { Analytics } from "@vercel/analytics/next";
+
 export const metadata: Metadata = {
   title: "CrunchTime",
 };
@@ -73,6 +75,7 @@ export default async function RootLayout({
             },
           }}
         >
+          <Analytics />
           <body data-overlayscrollbars-initialize>
             <Header />
             <SkeletonTheme baseColor="#bcbcbc" highlightColor="#393939">
