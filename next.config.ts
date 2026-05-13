@@ -25,8 +25,9 @@ const nextConfig: NextConfig = {
   },
   cacheComponents: true,
   deploymentId:
-    process.env.NEXT_DEPLOYMENT_ID ||
-    execSync("git rev-parse HEAD").toString().trim(),
+    process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 32) ||
+    process.env.GITHUB_SHA?.slice(0, 32) ||
+    "local-build",
 };
 
 export default nextConfig;
