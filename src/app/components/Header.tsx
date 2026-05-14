@@ -47,6 +47,11 @@ export default function Header() {
               onClick={setTheme}
               animate={{ rotate: theme === "light" ? [0, 360] : [360, 0] }}
               transition={{ duration: 0.4 }}
+              aria-label={
+                theme === "light"
+                  ? "Change to dark mode"
+                  : "Change to light mode"
+              }
             >
               {theme === "light" ? (
                 <MdDarkMode className="w-6 h-6  text-cta" />
