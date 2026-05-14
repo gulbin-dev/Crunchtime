@@ -15,6 +15,7 @@ import "@styles/globals.css";
 import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://crunchtime-gulbin-devs-projects.vercel.app/"),
   title: "CrunchTime | Movie List Demo",
   description:
     "A movie list demo website made by a frontend React web developer Joshua Glenn R. Gulbin. The website uses the TMDB API but is not endorsed, certified, or otherwise approved by TMDB.",
@@ -32,7 +33,7 @@ export const metadata: Metadata = {
     title: "CrunchTime | Movie List Demo",
     description:
       "A movie list demo website made by a frontend React web developer Joshua Glenn R. Gulbin. The website uses the TMDB API but is not endorsed, certified, or otherwise approved by TMDB.",
-    url: "https://crunchtime-demo-gulbindev.vercel.app/",
+    url: "https://crunchtime-gulbin-devs-projects.vercel.app/",
     siteName: "CrunchTime | Movie List Demo",
     type: "website",
     images: {
