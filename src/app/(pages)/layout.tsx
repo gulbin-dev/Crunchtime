@@ -15,7 +15,44 @@ import "@styles/globals.css";
 import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
-  title: "CrunchTime",
+  title: "CrunchTime | Movie List Demo",
+  description:
+    "A movie list demo website made by a frontend React web developer Joshua Glenn R. Gulbin. The website uses the TMDB API but is not endorsed, certified, or otherwise approved by TMDB.",
+  authors: {
+    name: "Joshua Glenn R. Gulbin",
+    url: "https://github.com/gulbin-dev",
+  },
+
+  creator: "Joshua Glenn R. Gulbin",
+  applicationName: "CrunchTime",
+  generator: "Next.js",
+  referrer: "strict-origin-when-cross-origin",
+
+  openGraph: {
+    title: "CrunchTime | Movie List Demo",
+    description:
+      "A movie list demo website made by a frontend React web developer Joshua Glenn R. Gulbin. The website uses the TMDB API but is not endorsed, certified, or otherwise approved by TMDB.",
+    url: "https://crunchtime-demo-gulbindev.vercel.app/",
+    siteName: "CrunchTime | Movie List Demo",
+    type: "website",
+    images: {
+      url: "/og/website.jpg",
+      width: 1200,
+      height: 630,
+      alt: "CrunchTime | Movie List Demo",
+    },
+  },
+
+  keywords: [
+    "crunchtime",
+    "crunchtime demo",
+    "movie list demo",
+    "joshua glenn gulbin",
+    "gulbindev",
+  ],
+  verification: {
+    google: "KsgDFoZLb80qI6Hqcm1B1BDkNzJyutg-LLhi2XjwuXw",
+  },
 };
 
 const poppins = Poppins({
