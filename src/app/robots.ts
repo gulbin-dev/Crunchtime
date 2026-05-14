@@ -14,6 +14,6 @@ export default function robots(): MetadataRoute.Robots {
       },
     ],
 
-    sitemap: "https://crunchtime-demo-gulbindev.vercel.app/sitemap.xml",
+    sitemap: "https://crunchtime-gulbin-devs-projects.vercel.app/sitemap.xml",
   };
 }
