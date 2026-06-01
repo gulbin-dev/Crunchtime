@@ -4,11 +4,6 @@ on:
   push:
     branches:
       - master
-      - pre-release
-  pull_request:
-    branches:
-      - master
-      - pre-release
 
 permissions:
   contents: write
@@ -33,22 +28,6 @@ jobs:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
 
-  release-beta:
-    if: github.ref_name == 'pre-release' || github.base_ref == 'pre-release'
-    runs-on: ubuntu-latest
-    outputs:
-      release_created: ${{ steps.release.outputs.release_created }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: googleapis/release-please-action@v4
-        id: release
-        with:
-          token: ${{ secrets.CRUNCHTIME_TOKEN }}
-          target-branch: pre-release
-          release-type: node
-          config-file: release-please-config.json
-          manifest-file: .release-please-manifest.json
-
   deploy-stable:
     needs: release-stable
     if: github.ref_name == 'master' && needs.release-stable.outputs.release_created
@@ -65,20 +44,3 @@ jobs:
       - run: vercel pull --yes --environment=production --token=${{ secrets.CRUNCHTIME_VERCEL_TOKEN }}
       - run: vercel build --prod --token=${{ secrets.CRUNCHTIME_VERCEL_TOKEN }}
       - run: vercel --prod --token=${{ secrets.CRUNCHTIME_VERCEL_TOKEN }}
-
-  deploy-beta:
-    needs: release-beta
-    if: github.ref_name == 'pre-release' && needs.release-beta.outputs.release_created
-    runs-on: ubuntu-latest
-    env:
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ACOUNT_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-      Read_Access_Token: ${{ secrets.READ_ACCESS_TOKEN }}
-      NEXT_PUBLIC_TMDB_BASE_URL: ${{ secrets.NEXT_PUBLIC_TMDB_BASE_URL }}
-
-    steps:
-      - uses: actions/checkout@v4
-      - run: npm install -g vercel@latest
-      - run: vercel pull --yes --environment=preview --token=${{ secrets.CRUNCHTIME_VERCEL_TOKEN }}
-      - run: vercel build --token=${{ secrets.CRUNCHTIME_VERCEL_TOKEN }}
-      - run: vercel deploy --prebuilt --token=${{ secrets.CRUNCHTIME_VERCEL_TOKEN }}
