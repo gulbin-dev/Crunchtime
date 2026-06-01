@@ -44,6 +44,11 @@ export interface Genres {
   genres: Genre[];
 }
 
+// Genre response type from useSWR
+export interface GenreResponseSWR {
+  data: Genres;
+}
+
 interface ProductionCompany {
   id: number;
   logo_path: string;
@@ -226,6 +231,15 @@ export interface TVPreview extends BasePreview {
   origin_country: string[];
 }
 
+// Response Type from SWR
+export interface FetchPosterFromSWR<T> {
+  data: T;
+  error: {
+    state: boolean;
+    status: number;
+  };
+}
+
 //  array of Movie and TV data types
 export type MediaTypes = (Movie | TV)[];
 
@@ -239,12 +253,12 @@ export interface FetchResponse<T> {
 }
 
 export interface Response<T> {
-  data: T | undefined;
+  data: T | [];
   error: {
     state: boolean;
-    type: string;
-    status: number;
-    message: string;
+    type: string | undefined;
+    status: number | undefined;
+    message: string | undefined;
   };
 }
 

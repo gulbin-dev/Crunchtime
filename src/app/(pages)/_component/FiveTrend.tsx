@@ -1,41 +1,44 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { Genres, MediaTypes, Movie, TV, FetchResponse } from "@utils/types";
+import { MediaTypes, Movie, TV, GenreResponseSWR } from "@utils/types";
 import { FaStar } from "react-icons/fa6";
 import { useEffect, useState } from "react";
 import genreAggregation from "@utils/genreAggregation";
 import UI_Brick from "@/app/components/UI/UI_Brick";
-import FailedDataDialog from "@/app/components/UI/Error/FailedDataDialog";
 import useSWR from "swr";
 import { fetcher } from "@utils/swr/fetcher";
 
+interface FiveTrendResponse {
+  data: MediaTypes;
+}
 export default function FiveTrend() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const { data: fiveTrend, error: fiveTrendError } = useSWR(
+  const { data: fiveTrend } = useSWR(
     "/api/heroTrend",
-    (url) => fetcher<FetchResponse<MediaTypes>>(url),
+    (url) => fetcher<FiveTrendResponse>(url),
     {
       suspense: true,
     },
   );
-  const { data: movieGenre, error: movieError } = useSWR(
-    "/api/movie",
-    (url) => fetcher<Genres>(url),
-    {
-      suspense: true,
-    },
-  );
-  const { data: tvGenre, error: tvError } = useSWR(
-    "/api/tv",
-    (url) => fetcher<Genres>(url),
-    {
-      suspense: true,
-    },
-  );
-  const genres = genreAggregation(movieGenre, tvGenre);
 
-  const normalize = fiveTrend.results
+  const { data: movieGenre } = useSWR(
+    "/api/movie",
+    (url) => fetcher<GenreResponseSWR>(url),
+    {
+      suspense: true,
+    },
+  );
+  const { data: tvGenre } = useSWR(
+    "/api/tv",
+    (url) => fetcher<GenreResponseSWR>(url),
+    {
+      suspense: true,
+    },
+  );
+  const genres = genreAggregation(movieGenre.data, tvGenre.data);
+
+  const normalize = fiveTrend.data
     .sort((a, b) => b.popularity - a.popularity)
     .slice(0, 5)
     .map((item) => {
@@ -58,11 +61,9 @@ export default function FiveTrend() {
     }, 5500);
 
     return () => clearInterval(interval);
-  }, [normalize, fiveTrendError]);
+  }, [normalize]);
   return (
     <>
-      {fiveTrendError && <FailedDataDialog error={fiveTrendError} />}
-
       {normalize &&
         normalize.map((item, i) => {
           let setClass = "";

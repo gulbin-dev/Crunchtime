@@ -3,10 +3,6 @@ export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const query = searchParams.get("query");
   const media = searchParams.get("media");
-  console.log("helllo");
-  console.log(
-    `${process.env.NEXT_PUBLIC_TMDB_BASE_URL}/search/${media}?query=${query}&include_adult=false&language=en-US&page=1`,
-  );
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_TMDB_BASE_URL}/search/${media}?query=${query}&include_adult=false&language=en-US&page=1`,
     {

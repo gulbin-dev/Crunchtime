@@ -13,6 +13,7 @@ import { tvGenreList } from "@server/tvGenres";
 import "react-loading-skeleton/dist/skeleton.css";
 import "@styles/globals.css";
 import { Analytics } from "@vercel/analytics/next";
+import ReduxProviderWrapper from "./ReduxProviderWrapper";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://crunchtime-gulbin-devs-projects.vercel.app/"),
@@ -92,11 +93,13 @@ export default async function RootLayout({
       <Suspense
         fallback={
           <body data-overlayscrollbars-initialize>
-            <Header />
-            <div className="flex items-center justify-center w-full h-screen">
-              <PageLoader />
-            </div>
-            <Footer />
+            <ReduxProviderWrapper>
+              <Header />
+              <div className="flex items-center justify-center w-full h-screen">
+                <PageLoader />
+              </div>
+              <Footer />
+            </ReduxProviderWrapper>
           </body>
         }
       >
@@ -115,12 +118,13 @@ export default async function RootLayout({
         >
           <body data-overlayscrollbars-initialize>
             <Analytics />
-
-            <Header />
-            <SkeletonTheme baseColor="#bcbcbc" highlightColor="#393939">
-              {children}
-            </SkeletonTheme>
-            <Footer />
+            <ReduxProviderWrapper>
+              <Header />
+              <SkeletonTheme baseColor="#bcbcbc" highlightColor="#393939">
+                {children}
+              </SkeletonTheme>
+              <Footer />
+            </ReduxProviderWrapper>
           </body>
         </SWRConfig>
       </Suspense>

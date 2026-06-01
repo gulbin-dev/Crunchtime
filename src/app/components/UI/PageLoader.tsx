@@ -1,12 +1,12 @@
 "use client";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
-import { useTheme } from "@utils/zustand/theme";
+import { useAppSelector } from "@hooks/redux-typed-hooks";
 export default function PageLoader({
   defaultColor,
 }: {
   defaultColor?: string;
 }) {
-  const theme = useTheme((state) => state.theme);
+  const theme = useAppSelector((state) => state.theme.theme);
   const hasDefaultColor = defaultColor !== undefined;
   return (
     <div

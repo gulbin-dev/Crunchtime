@@ -1,7 +1,7 @@
 import CardPosterImagePlaceholder from "@/app/components/UI/CardPosterImagePlaceholder";
 import UI_Brick from "@/app/components/UI/UI_Brick";
 import genreAggregation from "@utils/genreAggregation";
-import { Movie, TV, Genres } from "@utils/types";
+import { Movie, TV, GenreResponseSWR } from "@utils/types";
 import Image from "next/image";
 import Link from "next/link";
 import useSWR from "swr";
@@ -15,21 +15,21 @@ export default function QueryCard({
   isMovie: boolean;
 }) {
   const mediaType = isMovie ? "movie" : "tv";
-  const { data: movie, error: movieError } = useSWR(
+  const { data: movie } = useSWR(
     `/api/movie`,
-    (url) => fetcher<Genres>(url),
+    (url) => fetcher<GenreResponseSWR>(url),
     {
       suspense: true,
     },
   );
-  const { data: tv, error: tvError } = useSWR(
+  const { data: tv } = useSWR(
     `/api/tv`,
-    (url) => fetcher<Genres>(url),
+    (url) => fetcher<GenreResponseSWR>(url),
     {
       suspense: true,
     },
   );
-  const genres = genreAggregation(movie, tv);
+  const genres = genreAggregation(movie.data, tv.data);
   const itemGenres = genres
     .filter((genre) => item.genre_ids.includes(genre.id))
     .map((item) => item.name);

@@ -4,7 +4,7 @@ import { normalizeData } from "@utils/normalizeData";
 import Link from "next/link";
 import "react-loading-skeleton/dist/skeleton.css";
 import useSWR from "swr";
-import { FetchResponse, MediaTypes } from "@utils/types";
+import { MediaTypes, FetchPosterFromSWR } from "@utils/types";
 import CardPosterImagePlaceholder from "@/app/components/UI/CardPosterImagePlaceholder";
 import LoaderCardPoster from "@/app/components/UI/LoaderCardPoster";
 import { fetcher } from "@utils/swr/fetcher";
@@ -24,12 +24,12 @@ export default function CardPoster({
   catalog: string;
   filteredGenre: string;
 }) {
-  const { data, isLoading, isValidating, error } = useSWR(
+  const { data, isLoading, isValidating } = useSWR(
     `/api/catalog?mediaType=${catalog}&genre=${filteredGenre}`,
-    (url) => fetcher<FetchResponse<MediaTypes>>(url),
+    (url) => fetcher<FetchPosterFromSWR<MediaTypes>>(url),
     { suspense: true },
   );
-  const normalized = normalizeData(data);
+  const normalized = normalizeData(data.data);
 
   const cards = normalized.slice(0, 10).map((item, i) => {
     return isValidating || isLoading ? (

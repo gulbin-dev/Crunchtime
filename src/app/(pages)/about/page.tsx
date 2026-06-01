@@ -1,10 +1,10 @@
 "use client";
-import { useTheme } from "@utils/zustand/theme";
+import { useAppSelector } from "@hooks/redux-typed-hooks";
 import Link from "next/link";
 import { BsLinkedin, BsGithub, BsGlobe } from "react-icons/bs";
 import Image from "next/image";
 export default function AboutPage() {
-  const theme = useTheme((state) => state.theme);
+  const theme = useAppSelector((state) => state.theme.theme);
   return (
     <main
       className={`w-full ${theme === "light" ? "bg-light text-dark" : "bg-dark text-light"}`}

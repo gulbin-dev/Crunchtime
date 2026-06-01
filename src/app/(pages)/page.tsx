@@ -1,29 +1,16 @@
-"use client";
 import Link from "next/link";
 import FiveTrend from "./_component/FiveTrend";
 import CatalogSection from "./_component/CatalogSection";
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
 import FiveTrendLoader from "@/app/components/UI/FiveTrendLoader";
 import PageLoader from "@/app/components/UI/PageLoader";
-import { useTheme } from "@utils/zustand/theme";
-import { motion, AnimatePresence } from "motion/react";
 import SearchUI from "@components/SearchUI";
+import PageWrapper from "./PageWrapper";
 
-/**
- * Home page component
- * @description - This component renders the home page, containing a hero section, a trending section, a catalog section for different genres, and a call-to-action section to sign up.
- * @returns {JSX.Element} - JSX element to render
- */
 export default function Home() {
-  const theme = useTheme((state) => state.theme);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const toggleModal = () => setIsModalOpen((prev) => !prev);
-
   return (
-    <motion.main
-      className={`w-full ${theme === "light" ? "bg-light text-dark" : "bg-dark text-light"}`}
-    >
-      <div className="max-w-180 place-self-center relative w-full">
+    <PageWrapper>
+      <div className="max-w-180 place-self-center relative w-full bg-primary text-foreground-primary transition-colors duration-300">
         <div className="relative z-20 mb-5">
           <h1
             className="text-pretty text-heading-lg font-bold pt-2 px-3
@@ -32,19 +19,10 @@ export default function Home() {
           >
             Discover worth to watch movies & TV shows
           </h1>
-          <button
-            className="bg-cta  text-light font-bold py-0.5 px-3 mx-3 mt-3 rounded-lg tablet:w-40 tablet:mt-3 tablet:ml-15"
-            onClick={toggleModal}
-            hidden={isModalOpen}
-          >
-            Find you want to watch...
-          </button>
         </div>
-        <AnimatePresence>
-          {isModalOpen && (
-            <SearchUI isOpen={isModalOpen} onClose={toggleModal} />
-          )}
-        </AnimatePresence>
+
+        <SearchUI />
+
         <section
           className="relative text-light w-full h-screen overflow-hidden bg-dark-50 px-3"
           aria-labelledby="popular-five"
@@ -75,7 +53,7 @@ export default function Home() {
             DISCOVER MORE
           </Link>
           <div
-            className={`flex flex-col mt-5 px-3 py-10 gap-2 tablet:flex-row tablet:justify-center tablet:gap-20  ${theme === "light" ? "bg-gray-shade text-dark" : "bg-dark-50 text-light"}`}
+            className={`flex flex-col mt-5 px-3 py-10 gap-2 tablet:flex-row tablet:justify-center tablet:gap-20 `}
           >
             <div>
               <h3 className="text-heading-lg">Watch Anytime, Anywhere</h3>
@@ -101,6 +79,6 @@ export default function Home() {
           </div>
         </section>
       </div>
-    </motion.main>
+    </PageWrapper>
   );
 }

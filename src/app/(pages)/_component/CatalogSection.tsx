@@ -3,7 +3,7 @@ import { useState } from "react";
 import CardPoster from "./CardPoster";
 import { Suspense } from "react";
 import InitialLoaderCardPoster from "@/app/components/UI/InitialLoaderCardPoster";
-import { Genres } from "@utils/types";
+import { GenreResponseSWR } from "@utils/types";
 import genreAggregation from "@utils/genreAggregation";
 import { checkGenreName } from "@utils/checkGenreName";
 import useSWR from "swr";
@@ -26,21 +26,22 @@ interface PropType {
  */
 export default function CatalogSection({ sectionTitle, genre }: PropType) {
   const [catalog, setCatalog] = useState("movie");
-  const { data: movieGenre, error: movieError } = useSWR(
+  const { data: movieGenre } = useSWR(
     "/api/movie",
-    (url) => fetcher<Genres>(url),
+    (url) => fetcher<GenreResponseSWR>(url),
     {
       suspense: true,
     },
   );
-  const { data: tvGenre, error: tvError } = useSWR(
+  const { data: tvGenre } = useSWR(
     "/api/tv",
-    (url) => fetcher<Genres>(url),
+    (url) => fetcher<GenreResponseSWR>(url),
     {
       suspense: true,
     },
   );
-  const fullGenreList = genreAggregation(movieGenre, tvGenre);
+
+  const fullGenreList = genreAggregation(movieGenre.data, tvGenre.data);
   const genreID = fullGenreList
     .filter((item) => checkGenreName(item, genre))
     .map((item) => item.id);

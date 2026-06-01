@@ -25,8 +25,8 @@ export async function trendingList(): Promise<
       options,
     );
     if (!response.ok) {
-      throw {
-        data: undefined,
+      return {
+        data: [],
         error: {
           state: true,
           type: "HTTP_ERROR",
@@ -35,11 +35,20 @@ export async function trendingList(): Promise<
         },
       };
     }
-    return await response.json();
+    const data = await response.json();
+    return {
+      data: data.results,
+      error: {
+        state: false,
+        type: undefined,
+        status: response?.status,
+        message: undefined,
+      },
+    };
   } catch (err: unknown) {
     const error = err as Error;
-    throw {
-      data: undefined,
+    return {
+      data: [],
       error: {
         state: true,
         type: `${error.name}`,

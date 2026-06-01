@@ -22,8 +22,8 @@ export async function preFetchDiscover(request: NextRequest) {
     );
 
     if (!response.ok) {
-      throw {
-        data: undefined,
+      return {
+        data: [],
         error: {
           state: true,
           type: "HTTP_ERROR",
@@ -33,11 +33,19 @@ export async function preFetchDiscover(request: NextRequest) {
       };
     }
     const data = await response.json();
-    return NextResponse.json(data);
+    return {
+      data: data.results,
+      error: {
+        state: false,
+        type: undefined,
+        status: response?.status,
+        message: undefined,
+      },
+    };
   } catch (err: unknown) {
     const error = err as Error;
-    throw {
-      data: undefined,
+    return {
+      data: [],
       error: {
         state: true,
         type: `${error.name}`,

@@ -18,8 +18,8 @@ export async function tvGenreList(): Promise<Response<Genres>> {
       options,
     );
     if (!response.ok) {
-      throw {
-        data: undefined,
+      return {
+        data: [],
         error: {
           state: true,
           type: "HTTP_ERROR",
@@ -28,11 +28,20 @@ export async function tvGenreList(): Promise<Response<Genres>> {
         },
       };
     }
-    return await response.json();
+    const data = await response.json();
+    return {
+      data: data,
+      error: {
+        state: false,
+        type: undefined,
+        status: response?.status,
+        message: undefined,
+      },
+    };
   } catch (err: unknown) {
     const error = err as Error;
-    throw {
-      data: undefined,
+    return {
+      data: [],
       error: {
         state: true,
         type: `${error.name}`,
