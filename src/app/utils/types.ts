@@ -231,15 +231,6 @@ export interface TVPreview extends BasePreview {
   origin_country: string[];
 }
 
-// Response Type from SWR
-export interface FetchPosterFromSWR<T> {
-  data: T;
-  error: {
-    state: boolean;
-    status: number;
-  };
-}
-
 //  array of Movie and TV data types
 export type MediaTypes = (Movie | TV)[];
 

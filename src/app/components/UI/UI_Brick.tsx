@@ -3,7 +3,7 @@
 interface Prop {
   value: string | string[];
   ariaLabel?: string;
-  style: string;
+  style?: string;
 }
 export default function UI_Brick({ value, ariaLabel, style }: Prop) {
   if (typeof value === "string") {

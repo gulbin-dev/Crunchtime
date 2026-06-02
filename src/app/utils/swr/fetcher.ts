@@ -3,7 +3,8 @@ export const fetcher: <T>(url: string) => Promise<T> = async (url) => {
   if (!res.ok) {
     const error = new Error("An error occurred while fetching the data.");
     // Attach extra info to the error object.
-    throw error;
+
+    return error;
   }
   return res.json();
 };

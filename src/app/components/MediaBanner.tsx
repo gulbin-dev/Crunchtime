@@ -8,21 +8,22 @@ import { handleRuntime } from "@utils/previewHelpers";
 import { Preview } from "@utils/types";
 import CardPosterImagePlaceholder from "./UI/CardPosterImagePlaceholder";
 import { fetcher } from "@utils/swr/fetcher";
-import { useTheme } from "@utils/zustand/theme";
+import { useAppSelector } from "../hooks/redux-typed-hooks";
 export default function MediaBanner() {
   const params = useParams();
-  const { data, error } = useSWR(
+  const { data } = useSWR(
     `/preview/${params.media}/${params.id}/api/preview?media=${params.media}&id=${params.id}`,
     (url) => fetcher<Preview>(url),
     { suspense: true },
   );
-  const theme = useTheme((state) => state.theme);
+  const theme = useAppSelector((state) => state.theme.theme);
   const normalize = data && normalizePreviewData(data);
   if (normalize === undefined) return null;
   const posterPath = normalize.images.posters[0]?.file_path;
   return (
     <div
-      className={`flex gap-2 px-3 relative ${theme === "light" ? "bg-light text-dark" : "bg-dark text-light"}`}
+      data-theme={theme}
+      className="flex gap-2 px-3 relative"
       role="region"
       aria-labelledby={`title-banner ${normalize.media_type}`}
     >

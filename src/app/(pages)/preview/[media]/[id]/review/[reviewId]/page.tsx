@@ -3,19 +3,19 @@ import MediaBanner from "@components/MediaBanner";
 import { FetchResponse, Review } from "@utils/types";
 import { redirect, RedirectType, useParams } from "next/navigation";
 import useSWR from "swr";
-import LineBreak from "@/app/components/UI/LineBreak";
+import LineBreak from "@components/UI/LineBreak";
 import { IoChevronBack } from "react-icons/io5";
-import PageLoader from "@/app/components/UI/PageLoader";
+import PageLoader from "@components/UI/PageLoader";
 import { fetcher } from "@utils/swr/fetcher";
-import { useTheme } from "@utils/zustand/theme";
 import ReviewComponent from "@components/ReviewComponent";
+import PageWrapper from "@/app/(pages)/PageWrapper";
+
 export default function ReviewPage() {
   const params = useParams();
   const { data, error } = useSWR(
     `/preview/${params.media}/${params.id}/review/${params.reviewId}/api/review?media=${params.media}&id=${params.id}`,
     (url) => fetcher<FetchResponse<Review[]>>(url),
   );
-  const theme = useTheme((state) => state.theme);
   if (error) console.error(error);
   if (!data)
     return (
@@ -23,13 +23,11 @@ export default function ReviewPage() {
         <PageLoader />
       </div>
     );
-
-  const review = data.results.filter(
-    (item) => item.id === params.reviewId?.slice(0, -3),
-  );
+  const review = data.results.filter((item) => item.id === params.reviewId);
   const isUpdated = review[0].updated_at
     ? review[0].updated_at.length > 0
     : false;
+
   const createdDate = new Date(review[0].created_at).toLocaleDateString(
     "en-US",
     {
@@ -46,9 +44,7 @@ export default function ReviewPage() {
     day: "numeric",
   });
   return (
-    <main
-      className={`w-full h-auto ${theme === "light" ? "bg-light text-dark" : "bg-dark text-light"}`}
-    >
+    <PageWrapper>
       <div className="max-w-180 place-self-center w-full">
         <button
           className="ml-3 bg-cta rounded-full p-1"
@@ -59,7 +55,7 @@ export default function ReviewPage() {
             )
           }
         >
-          <IoChevronBack className=" text-light text-2xl" />
+          <IoChevronBack className="text-2xl" />
         </button>
         <MediaBanner />
         <div className="flex flex-col gap-2 mt-2 px-3 h-fit p-1">
@@ -68,7 +64,7 @@ export default function ReviewPage() {
           </h1>
           {isUpdated ? (
             <p className="text-xs flex gap-1 items-center">
-              <span className="italic p-0.5 rounded bg-gray-shade text-dark">
+              <span className="italic p-0.5 rounded bg-gray-shade">
                 Updated
               </span>
               {updateDate}
@@ -92,6 +88,6 @@ export default function ReviewPage() {
           />
         </div>
       </div>
-    </main>
+    </PageWrapper>
   );
 }

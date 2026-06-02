@@ -1,6 +1,5 @@
-import { FetchResponse } from "@utils/types";
+import { FetchResponse, MediaTypes, Response } from "@utils/types";
 import { cacheTag } from "next/cache";
-import { MediaTypes, Response } from "../utils/types";
 const options = {
   method: "GET",
   headers: {
@@ -19,7 +18,7 @@ export async function discoverMedia(
   let response;
   try {
     response = await fetch(
-      `https://api.themoviedb.org/3/discover/${toFetch}?include_adult=false&include_video=false&language=en-US&page=1&sort_by=popularity.desc${genre !== "" ? `&with_genres=${genre}` : ""}`,
+      `${process.env.NEXT_PUBLIC_TMDB_BASE_URL}/discover/${toFetch}?include_adult=false&include_video=false&language=en-US&page=1&sort_by=popularity.desc${genre !== "" ? `&with_genres=${genre}` : ""}`,
       options,
     );
     if (!response.ok) {

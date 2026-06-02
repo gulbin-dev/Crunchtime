@@ -10,7 +10,8 @@ export default function PageLoader({
   const hasDefaultColor = defaultColor !== undefined;
   return (
     <div
-      className={`flex gap-1 ${hasDefaultColor ? defaultColor : ""}  ${theme === "light" ? "text-dark" : "text-light"}`}
+      data-theme={theme}
+      className={`flex gap-1 ${hasDefaultColor ? defaultColor : ""}`}
     >
       <p>Loading</p>
       <AiOutlineLoading3Quarters className="animate-spin" />

@@ -20,13 +20,13 @@ export default function FailedDataDialog({
   return (
     <dialog
       ref={dialogRef}
-      className="rounded-lg bg-light text-dark place-self-center p-4"
+      className="rounded-lg place-self-center p-4"
       closedby="any"
     >
       <h2 className="text-heading-md"></h2>
       <p className="text-red-600 mt-3">{error.message}</p>
       <button
-        className="bg-cta mt-5 float-right font-bold text-light rounded-md py-1 px-3"
+        className="bg-cta mt-5 float-right font-bold rounded-md py-1 px-3"
         onClick={handleTry}
       >
         Try Again

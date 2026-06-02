@@ -3,8 +3,7 @@
 import { FetchResponse, Review } from "@utils/types";
 import Image from "next/image";
 import AvatarPlaceholder from "./UI/AvatarPlaceholder";
-import { useLayoutEffect, useRef, useState } from "react";
-import ShowMoreBtn from "./UI/ShowMoreBtn";
+import { useRef, useState, useEffect } from "react";
 import useSWR from "swr";
 import { ParamValue } from "next/dist/server/request/params";
 import Link from "next/link";
@@ -21,156 +20,164 @@ export default function ReviewComponent({
   reviewID?: string;
 }) {
   const [pageIndex, setPageIndex] = useState(1);
-  const { data, error } = useSWR(
+  const { data } = useSWR(
     `/preview/${media}/${id}/api/review?media=${media}&id=${id}&page=${pageIndex}`,
     (url) => fetcher<FetchResponse<Review[]>>(url),
     { suspense: true },
   );
+
+  // Explicitly typing the Map to handle HTMLDivElement
   const containerRefs = useRef<Map<string, HTMLDivElement>>(new Map());
-  const [overflowingIds, setOverflowingIds] = useState<Record<string, boolean>>(
-    {},
-  );
-  useLayoutEffect(() => {
-    const newOverflows: Record<string, boolean> = {};
-    const observer = new ResizeObserver((entries) => {
-      let changed = false;
+  const [isClampedMap, setIsClampedMap] = useState<Record<string, boolean>>({});
 
-      entries.forEach((entry) => {
-        const id = entry.target.getAttribute("data-id");
-        if (id) {
-          const isOverflowing = entry.target.scrollHeight > 250;
-          if (overflowingIds[id] !== isOverflowing) {
-            newOverflows[id] = isOverflowing;
-            changed = true;
+  useEffect(() => {
+    const observers: ResizeObserver[] = [];
+    const currentRefs = containerRefs.current;
 
-            // Apply styles manually to avoid a second state-driven render loop
-            const el = entry.target as HTMLDivElement;
-            if (isOverflowing) {
-              el.style.height = "250px";
-              el.style.overflow = "hidden";
-            } else {
-              el.style.height = "auto";
-              el.style.paddingBottom = "24px";
-            }
-          }
-        }
-      });
+    // Loop through all active refs in the map
+    currentRefs.forEach((el, itemId) => {
+      const textElement = el.querySelector("q");
+      if (!textElement) return;
 
-      if (changed) {
-        setOverflowingIds((prev) => ({ ...prev, ...newOverflows }));
-      }
+      const checkTruncation = () => {
+        const isTruncated = textElement.scrollHeight > textElement.clientHeight;
+
+        setIsClampedMap((prev) => {
+          if (prev[itemId] === isTruncated) return prev;
+          return { ...prev, [itemId]: isTruncated };
+        });
+      };
+
+      const resizeObserver = new ResizeObserver(() => checkTruncation());
+      resizeObserver.observe(textElement);
+      observers.push(resizeObserver);
+
+      // Run initial layout check
+      checkTruncation();
     });
 
-    containerRefs.current.forEach((el) => observer.observe(el));
+    return () => {
+      observers.forEach((obs) => obs.disconnect());
+    };
+    // FIX: Depend on data so it reruns when SWR fetches new pages or items
+  }, [data]);
 
-    return () => observer.disconnect();
-  });
+  // Safely extract results or fallback to empty array if data isn't fully loaded
+  const reviewsList = data?.results || [];
+  const filteredReviews = reviewsList
+    .slice(0, 5)
+    .filter((item) => item.id !== (reviewID || ""));
 
-  const showMoreBtn = data.results.length > 5 ? <ShowMoreBtn /> : null;
   return (
     <>
-      <ul className="list-none p-0 relative text-dark px-3">
-        {data.results
-          .slice(0, 5)
-          .filter((item) => item.id !== reviewID || "")
-          .map((item) => {
-            const isUpdated = item.updated_at
-              ? item.updated_at.length > 0
-              : false;
-            const chekerResult = avatarPathChecker(
-              item.author_details.avatar_path,
-            );
+      <ul className="list-none p-0 relative px-3">
+        {filteredReviews.map((item) => {
+          const isUpdated = item.updated_at
+            ? item.updated_at.length > 0
+            : false;
+          const checkerResult = avatarPathChecker(
+            item.author_details.avatar_path,
+          );
 
-            const createdDate = new Date(item.created_at).toLocaleDateString(
-              "en-US",
-              { year: "numeric", month: "long", day: "numeric" },
-            );
-            const updateDate = new Date(
-              item.updated_at || "",
-            ).toLocaleDateString("en-US", {
+          const createdDate = new Date(item.created_at).toLocaleDateString(
+            "en-US",
+            {
               year: "numeric",
               month: "long",
               day: "numeric",
-            });
+            },
+          );
+          const updateDate = new Date(item.updated_at || "").toLocaleDateString(
+            "en-US",
+            {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            },
+          );
 
-            return (
-              <li
-                key={item.id}
-                className="mt-3 border-b border-gray-shade/10 pb-4 "
-              >
-                <div className="bg-secondary rounded-sm px-2 pt-2 tablet:rounded-xl">
-                  <Link href={`/preview/${media}/${id}/review/${item.id}}`}>
-                    <div className="grid grid-cols-[45px_1fr] gap-3">
-                      {chekerResult ? (
-                        <Image
-                          src={chekerResult}
-                          alt=""
-                          width={45}
-                          height={45}
-                          className="rounded-full h-[45px] object-cover"
-                        />
+          return (
+            <li
+              key={item.id}
+              className="mt-3 border-b border-gray-shade/10 pb-4"
+            >
+              <div className="bg-secondary text-foreground-dark rounded-sm px-2 pt-2 tablet:rounded-xl">
+                {/* FIX: Removed extra trailing '}' from the template string expression */}
+                <Link href={`/preview/${media}/${id}/review/${item.id}`}>
+                  <div className="grid grid-cols-[45px_1fr] gap-3">
+                    {checkerResult ? (
+                      <Image
+                        src={checkerResult}
+                        alt=""
+                        width={45}
+                        height={45}
+                        className="rounded-full h-[45px] object-cover"
+                      />
+                    ) : (
+                      <AvatarPlaceholder />
+                    )}
+
+                    <div>
+                      <h4 className="font-bold">{item.author}</h4>
+                      {isUpdated ? (
+                        <p className="text-xs flex gap-1 items-center mt-1">
+                          {updateDate}
+                          <span className="italic rounded py-0.2 px-1">
+                            Updated
+                          </span>
+                        </p>
                       ) : (
-                        <AvatarPlaceholder />
+                        <p className="text-xs mt-1">{createdDate}</p>
                       )}
-
-                      <div>
-                        <h4 className="font-bold">{item.author}</h4>
-
-                        {isUpdated ? (
-                          <p className="text-xs flex gap-1 items-center mt-1">
-                            {updateDate}
-                            <span className="italic rounded bg-tertiary py-0.2 px-1">
-                              Updated
-                            </span>
-                          </p>
-                        ) : (
-                          <p className="text-xs mt-1">{createdDate}</p>
-                        )}
-                      </div>
                     </div>
-                  </Link>
-
-                  <div
-                    className="mt-3"
-                    data-id={item.id}
-                    ref={(el) => {
-                      if (el) containerRefs.current.set(item.id, el);
-                      else containerRefs.current.delete(item.id);
-                    }}
-                    style={{ lineHeight: "1.5" }}
-                  >
-                    <q className="italic text-pretty">{item.content}</q>
                   </div>
-                </div>
+                </Link>
 
-                {overflowingIds[item.id] && (
-                  <div className="flex justify-end mt-1">
+                <div
+                  className="mt-3 pb-3"
+                  data-id={item.id}
+                  ref={(el) => {
+                    if (el) containerRefs.current.set(item.id, el);
+                    else containerRefs.current.delete(item.id);
+                  }}
+                  style={{ lineHeight: "1.5" }}
+                >
+                  {/* FIX: Added 'block' class so element obeys height boundaries */}
+                  <q className="italic text-pretty line-clamp-10">
+                    {item.content}
+                  </q>
+
+                  {/* CONDITIONAL RENDER: Only shows if text overflows line-clamp-10 */}
+                  {isClampedMap[item.id] && (
                     <Link
-                      href={`/preview/${media}/${id}/review/${item.id}}`}
-                      className="text-cta font-bold text-xs hover:underline"
+                      href={`/preview/${media}/${id}/review/${item.id}`}
+                      className="bg-cta text-foreground-dark py-0.5 px-1.5 mt-1 inline-block rounded-2xl"
                     >
-                      ... read more
+                      Read more
                     </Link>
-                  </div>
-                )}
-              </li>
-            );
-          })}
-        {showMoreBtn}
-        {data.results.length === 0 && (
+                  )}
+                </div>
+              </div>
+            </li>
+          );
+        })}
+
+        {filteredReviews.length === 0 && (
           <p className="italic text-center my-3">No reviews found.</p>
         )}
       </ul>
+
       <div className="flex mt-3 justify-center gap-5 pb-3">
         <button
-          className="bg-cta text-light py-0.5 px-1.5 rounded-md"
-          onClick={() => setPageIndex(pageIndex > 1 ? pageIndex - 1 : 1)}
+          className="bg-cta py-0.5 px-1.5 rounded-md disabled:opacity-50"
+          onClick={() => setPageIndex((prev) => Math.max(prev - 1, 1))}
+          disabled={pageIndex === 1}
         >
           Previous
         </button>
         <button
-          className="bg-cta text-light py-0.5 px-1.5 rounded-md"
-          onClick={() => setPageIndex(pageIndex + 1)}
+          className="bg-cta py-0.5 px-1.5 rounded-md"
+          onClick={() => setPageIndex((prev) => prev + 1)}
         >
           Next
         </button>

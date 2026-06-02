@@ -1,34 +1,49 @@
-import { createSlice } from "@reduxjs/toolkit";
-import type { RootState } from "@utils/redux-toolkit/store";
+import { createSlice, createAction } from "@reduxjs/toolkit";
+import { REMEMBER_REHYDRATED } from "redux-remember";
 
-// Define a type for the slice state
-interface ThemeType {
+interface ThemeStateType {
   theme: "light" | "dark";
 }
 
-// Define the initial state using that type
-const initialState: ThemeType = {
-  theme: "light",
+interface LocalStorageThemeStateType {
+  theme?: {
+    theme: "light" | "dark";
+  };
+}
+const getOSTheme = (): "light" | "dark" => {
+  if (typeof window !== "undefined" && window.matchMedia) {
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
+  }
+  return "light"; // Server fallback
+};
+
+// OS theme preference initial state
+const initialState: ThemeStateType = {
+  theme: getOSTheme(),
 };
 
 export const themeSlice = createSlice({
-  name: "counter",
-  // `createSlice` will infer the state type from the `initialState` argument
+  name: "theme",
   initialState,
   reducers: {
     toggleTheme: (state) => {
-      if (state.theme === "light") {
-        state.theme = "dark";
-      } else {
-        state.theme = "light";
-      }
+      state.theme = state.theme === "light" ? "dark" : "light";
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      // setting theme if the user has a saved theme state in localStorage
+      .addCase(
+        createAction<LocalStorageThemeStateType>(REMEMBER_REHYDRATED),
+        (state, action) => {
+          const getLocalStorageTheme = action.payload?.[themeSlice.name];
+          state.theme = getLocalStorageTheme?.theme || getOSTheme(); // fallback to OS theme if no saved theme in localStorage
+        },
+      );
   },
 });
 
 export const { toggleTheme } = themeSlice.actions;
-
-// Other code such as selectors can use the imported `RootState` type
-export const setTheme = (state: RootState) => state.theme;
-
 export default themeSlice.reducer;

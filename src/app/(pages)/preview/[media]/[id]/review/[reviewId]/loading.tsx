@@ -1,11 +1,13 @@
 "use client";
-import PageLoader from "@/app/components/UI/PageLoader";
-import { useTheme } from "@utils/zustand/theme";
+import PageLoader from "@components/UI/PageLoader";
+import { useAppSelector } from "@hooks/redux-typed-hooks";
+
 export default function ReviewLoading() {
-  const theme = useTheme((state) => state.theme);
+  const theme = useAppSelector((state) => state.theme.theme);
   return (
     <div
-      className={`h-screen w-full flex items-center justify-center ${theme === "light" ? "bg-light" : "bg-dark"}`}
+      data-theme={theme}
+      className="h-screen w-full flex items-center justify-center"
     >
       <PageLoader />
     </div>

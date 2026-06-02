@@ -1,4 +1,3 @@
-import { FetchResponse, Review } from "@utils/types";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -16,6 +15,6 @@ export async function GET(request: NextRequest) {
     },
   );
 
-  const data: Promise<FetchResponse<Review[]>> = await response.json();
+  const data = await response.json();
   return NextResponse.json(data);
 }

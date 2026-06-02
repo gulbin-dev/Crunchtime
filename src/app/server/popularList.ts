@@ -13,15 +13,13 @@ const options = {
 };
 
 //  fetching list of   `Movie`, `Tv shows` and `People`
-export async function trendingList(): Promise<
-  Response<FetchResponse<MediaTypes>>
-> {
+export async function popularList(): Promise<Response<MediaTypes>> {
   "use cache";
   cacheLife("weeks");
   let response;
   try {
     response = await fetch(
-      "https://api.themoviedb.org/3/trending/all/week?language=en-US",
+      `${process.env.NEXT_PUBLIC_TMDB_BASE_URL}/trending/all/week?language=en-US`,
       options,
     );
     if (!response.ok) {
@@ -35,7 +33,7 @@ export async function trendingList(): Promise<
         },
       };
     }
-    const data = await response.json();
+    const data: FetchResponse<MediaTypes> = await response.json();
     return {
       data: data.results,
       error: {

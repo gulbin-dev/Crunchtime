@@ -1,14 +1,10 @@
-"use client";
-import { useAppSelector } from "@hooks/redux-typed-hooks";
 import Link from "next/link";
 import { BsLinkedin, BsGithub, BsGlobe } from "react-icons/bs";
 import Image from "next/image";
+import PageWrapper from "../PageWrapper";
 export default function AboutPage() {
-  const theme = useAppSelector((state) => state.theme.theme);
   return (
-    <main
-      className={`w-full ${theme === "light" ? "bg-light text-dark" : "bg-dark text-light"}`}
-    >
+    <PageWrapper>
       <div className="p-3 max-w-7xl flex flex-col items-center justify-self-center w-full ">
         <p className="mt-5 text-justify inline-block max-w-100">
           This website is for{" "}
@@ -78,6 +74,6 @@ export default function AboutPage() {
           </li>
         </ul>
       </div>
-    </main>
+    </PageWrapper>
   );
 }

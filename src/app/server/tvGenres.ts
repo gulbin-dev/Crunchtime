@@ -1,4 +1,4 @@
-import { Response, Genres } from "../utils/types";
+import { Response, Genres, Genre } from "@utils/types";
 import { cacheLife } from "next/cache";
 const options = {
   method: "GET",
@@ -8,13 +8,14 @@ const options = {
     cache: "force-cache",
   },
 };
-export async function tvGenreList(): Promise<Response<Genres>> {
+export async function tvGenreList(): Promise<Response<Genre[]>> {
   "use cache";
   cacheLife("weeks");
+
   let response;
   try {
     response = await fetch(
-      "https://api.themoviedb.org/3/genre/tv/list",
+      `${process.env.NEXT_PUBLIC_TMDB_BASE_URL}/genre/tv/list`,
       options,
     );
     if (!response.ok) {
@@ -28,9 +29,9 @@ export async function tvGenreList(): Promise<Response<Genres>> {
         },
       };
     }
-    const data = await response.json();
+    const data: Genres = await response.json();
     return {
-      data: data,
+      data: data.genres,
       error: {
         state: false,
         type: undefined,

@@ -11,7 +11,7 @@ export async function preFetchDiscover(request: NextRequest) {
   let response;
   try {
     response = await fetch(
-      `https://api.themoviedb.org/3/discover/${mediaType}?include_adult=false&include_video=false&language=en-US&page=1&sort_by=popularity.desc&with_genres=${genre}`,
+      `${process.env.NEXT_PUBLIC_TMDB_BASE_URL}/discover/${mediaType}?include_adult=false&include_video=false&language=en-US&page=1&sort_by=popularity.desc&with_genres=${genre}`,
       {
         method: "GET",
         headers: {

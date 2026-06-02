@@ -1,8 +1,15 @@
+"use client";
 import Link from "next/link";
 import { BsLinkedin, BsGithub, BsGlobe } from "react-icons/bs";
+import { useAppSelector } from "@hooks/redux-typed-hooks";
+
 export default function Footer() {
+  const theme = useAppSelector((state) => state.theme.theme);
   return (
-    <footer className="bg-dark-50 text-light py-4 w-full flex justify-center">
+    <footer
+      data-theme={theme}
+      className="bg-primary text-foreground-primary py-4 w-full flex justify-center duration-300 transition-colors"
+    >
       <div className="max-w-7xl w-full h-full px-3">
         <h2 className="text-heading-lg">CrunchTime</h2>
         <p className="mt-1 tablet:mt-2 tablet:px-3">

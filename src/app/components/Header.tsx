@@ -81,18 +81,24 @@ export default function Header() {
             <button
               className="tablet:mr-1.5"
               onClick={() => setTheme(toggleTheme())}
-              aria-label={
-                theme === "light"
-                  ? "Change to dark mode"
-                  : "Change to light mode"
-              }
+              aria-label="Toggle light/dark mode"
             >
+              <span
+                className="sr-only"
+                aria-label={
+                  theme === "light"
+                    ? "Light mode is active"
+                    : "Dark mode is active"
+                }
+                aria-live="polite"
+              ></span>
               {theme === "light" ? (
                 <DarkModeIcon className="w-6 h-6  text-cta" />
               ) : (
                 <LightModeIcon className="w-6 h-6 text-cta" />
               )}
             </button>
+
             <button
               ref={triggerRef}
               onClick={toggleSideBarHandler}
@@ -105,6 +111,16 @@ export default function Header() {
               aria-expanded={isToggledMenu ? true : false}
               aria-controls="mobile-menu"
             >
+              {" "}
+              <span
+                className="sr-only"
+                aria-label={
+                  isToggledMenu
+                    ? "Navigation panel is open"
+                    : "Navigation panel is closed"
+                }
+                aria-live="polite"
+              ></span>
               <span
                 className="hamburger-icon top-2.5"
                 aria-hidden="true"

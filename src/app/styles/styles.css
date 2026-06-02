@@ -34,18 +34,6 @@
     font-size: 0.9em;
     margin-left: 4px;
   }
-  .carousel {
-    transition: transform 1s ease-in-out;
-  }
-  .top-carousel {
-    transform: translateX(-100%);
-  }
-  .bottom-carousel {
-    transform: translateX(100%);
-  }
-  .mid-carousel {
-    transform: translateX(0);
-  }
   .iFrame {
     aspect-ratio: 16/9;
     font-size: 16px;
@@ -74,11 +62,11 @@
 
 @layer utilities {
   ::-webkit-scrollbar-thumb {
-    background: var(--color-cta);
+    background: var(--color-secondary);
     border-radius: 8px;
   }
   ::-webkit-scrollbar-track {
-    background: transparent;
+    background: var(--color-gray-shade);
   }
   ::-webkit-scrollbar {
     width: 8px !important;
