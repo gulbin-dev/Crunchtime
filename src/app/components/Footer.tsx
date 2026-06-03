@@ -1,8 +1,15 @@
+"use client";
 import Link from "next/link";
-import { BsLinkedin, BsGithub, BsGlobe } from "react-icons/bs";
+import { GithubIcon, LinkedinIcon, GlobeIcon } from "@utils/tabler-icons";
+import { useAppSelector } from "@hooks/redux-typed-hooks";
+
 export default function Footer() {
+  const theme = useAppSelector((state) => state.theme.theme);
   return (
-    <footer className="bg-dark-50 text-light py-4 w-full flex justify-center">
+    <footer
+      data-theme={theme}
+      className="bg-primary text-foreground-primary py-4 w-full flex justify-center duration-300 transition-colors"
+    >
       <div className="max-w-7xl w-full h-full px-3">
         <h2 className="text-heading-lg">CrunchTime</h2>
         <p className="mt-1 tablet:mt-2 tablet:px-3">
@@ -23,7 +30,7 @@ export default function Footer() {
               target="_blank"
               aria-label="Navigate to the developer's Linkedin Profile"
             >
-              <BsLinkedin className="text-heading-lg" aria-hidden />
+              <LinkedinIcon className="text-heading-lg" aria-hidden />
             </Link>
           </li>
           <li>
@@ -32,16 +39,16 @@ export default function Footer() {
               target="_blank"
               aria-label="Navigate to the developer's Github Profile"
             >
-              <BsGithub className="text-heading-lg" aria-hidden />
+              <GithubIcon className="text-heading-lg" aria-hidden />
             </Link>
           </li>
           <li>
             <Link
-              href=""
+              href="https://portfolio-gulbindev.vercel.app/"
               target="_blank"
               aria-label="Navigate to the developer's portfolio website"
             >
-              <BsGlobe className="text-heading-lg" aria-hidden />
+              <GlobeIcon className="text-heading-lg" aria-hidden />
             </Link>
           </li>
         </ul>

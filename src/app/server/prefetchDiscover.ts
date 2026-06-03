@@ -11,7 +11,7 @@ export async function preFetchDiscover(request: NextRequest) {
   let response;
   try {
     response = await fetch(
-      `https://api.themoviedb.org/3/discover/${mediaType}?include_adult=false&include_video=false&language=en-US&page=1&sort_by=popularity.desc&with_genres=${genre}`,
+      `${process.env.NEXT_PUBLIC_TMDB_BASE_URL}/discover/${mediaType}?include_adult=false&include_video=false&language=en-US&page=1&sort_by=popularity.desc&with_genres=${genre}`,
       {
         method: "GET",
         headers: {
@@ -22,8 +22,8 @@ export async function preFetchDiscover(request: NextRequest) {
     );
 
     if (!response.ok) {
-      throw {
-        data: undefined,
+      return {
+        data: [],
         error: {
           state: true,
           type: "HTTP_ERROR",
@@ -33,11 +33,19 @@ export async function preFetchDiscover(request: NextRequest) {
       };
     }
     const data = await response.json();
-    return NextResponse.json(data);
+    return {
+      data: data.results,
+      error: {
+        state: false,
+        type: undefined,
+        status: response?.status,
+        message: undefined,
+      },
+    };
   } catch (err: unknown) {
     const error = err as Error;
-    throw {
-      data: undefined,
+    return {
+      data: [],
       error: {
         state: true,
         type: `${error.name}`,

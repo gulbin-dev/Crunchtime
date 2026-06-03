@@ -69,6 +69,10 @@
     font-family: var(--font-important) !important;
     font-weight: 700;
   }
+
+  button:hover {
+    cursor: pointer;
+  }
 }
 @media (prefers-reduced-motion: no-preference) {
   html {
@@ -81,22 +85,27 @@
   --font-body: var(--font-roboto);
 }
 
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 @theme {
   --spacing: 8px;
   --breakpoint-tablet: 768px;
   --breakpoint-desktop: 1024px;
-  --color-light-contrast: #f5f5f5;
-  --color-light: #ededed;
-  --color-gray-shade: #bcbcbc;
-  --color-dark: #1f1f1f;
-  --color-dark-contrast: #101010;
-  --color-dark-50: #393939;
+  --breakpoint-desktop-large: 1440px;
+  --color-primary: #dfdfdf;
+  --color-foreground-primary: #1f1f1f;
+  --color-foreground-dark: #1f1f1f;
+  --color-foreground-light: #dfdfdf;
   --color-secondary: #ffb400;
-  --color-tertiary: #e8ff00;
   --color-cta: #00a5f9;
   --color-cta-secondary: #89d7ff;
+  --color-gray-shade: #afafaf;
   --text-heading-md: clamp(1.2em, 4vw, 1.4em);
   --text-heading-lg: clamp(1.6em, 4vw, 2em);
   --text-heading-xl: clamp(2.2em, 4vw, 2.6em);
   --text-heading-sm: clamp(0.5em, 4vw, 1em);
+}
+[data-theme="dark"] {
+  --color-primary: #1f1f1f;
+  --color-foreground-primary: #dfdfdf;
 }

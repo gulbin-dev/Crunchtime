@@ -1,125 +1,183 @@
 "use client";
+
 import useSWR from "swr";
-import { useState, Suspense, useEffect, useRef } from "react";
-import { FetchResponse, MediaTypes } from "../utils/types";
+import { useState, Suspense, useRef, useEffect } from "react";
+import { FetchResponse, MediaTypes } from "@utils/types";
 import QueryCard from "./QueryCard";
 import { normalizeData } from "@utils/normalizeData";
-import { TbLetterX } from "react-icons/tb";
+import { CloseIcon, SearchIcon } from "@utils/tabler-icons";
 import LoaderCardPoster from "./UI/LoaderCardPoster";
 import PageLoader from "./UI/PageLoader";
 import { fetcher } from "@utils/swr/fetcher";
-import { motion } from "motion/react";
-export default function SearchUI({
-  isOpen,
-  onClose,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-}) {
+import { gsap, useGSAP } from "@utils/gsap";
+import Button from "./UI/Button";
+
+export default function SearchUI() {
   const [query, setQuery] = useState("");
   const [isMovie, setIsMovie] = useState(true);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const dialogRef = useRef<HTMLDialogElement>(null);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const dialogRef = useRef<HTMLDialogElement | null>(null);
+  const innerContentRef = useRef<HTMLDivElement | null>(null);
   const { data, isLoading, error } = useSWR(
     (query.length > 0 && isMovie) || (query.length > 0 && !isMovie)
       ? `/api/search?query=${query}&media=${isMovie ? "movie" : "tv"}`
       : null,
     (url: string) => fetcher<FetchResponse<MediaTypes>>(url),
   );
-  const normalized = data ? normalizeData(data) : [];
+  const normalized = data ? normalizeData(data.results) : [];
 
   useEffect(() => {
-    if (inputRef.current && dialogRef.current) {
-      const input = inputRef.current;
-      const dialog = dialogRef.current;
-      if (isOpen) {
-        input.focus();
-        dialog.showModal();
-      } else {
-        dialog.close();
-      }
+    document.body.style.overflow = isSearchModalOpen ? "hidden" : "auto";
+  }, [isSearchModalOpen]);
+
+  // Open modal using native HTML5 API
+  const handleOpen = () => {
+    dialogRef.current?.showModal();
+    setIsSearchModalOpen(true);
+  };
+
+  // Close modal using GSAP animation first, then call native close
+  const handleClose = () => {
+    gsap.to(innerContentRef.current, {
+      y: "102%",
+      duration: 0.4,
+      ease: "power2.in",
+      onComplete: () => {
+        dialogRef.current?.close();
+        setIsSearchModalOpen(false);
+        setQuery(""); // Reset search input on close
+      },
+    });
+  };
+
+  useGSAP(() => {
+    if (isSearchModalOpen) {
+      /* 
+        Using fromTo forces GSAP to instantly snap the element to a 102% offset 
+        on the GPU thread, killing the native browser layout-flash completely.
+      */
+      gsap.fromTo(
+        innerContentRef.current,
+        { y: "102%" },
+        {
+          y: 0,
+          duration: 0.45,
+          ease: "power3.out", // Smooth deceleration curve
+          onComplete: () => {
+            inputRef.current?.focus();
+          },
+        },
+      );
     }
-  }, [isOpen]);
-
+  }, [isSearchModalOpen]);
   return (
-    <motion.dialog
-      ref={dialogRef}
-      onCancel={onClose}
-      closedby="any"
-      className="bg-dark-50 fixed w-full h-screen text-light place-self-center z-30 duration-100 overflow-x-hidden"
-      initial={{ opacity: 0, y: 200 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 200 }}
-      key="dialog"
-    >
-      <button
-        className="float-right bg-cta w-6 h-6 rounded-lg text-light my-4 mr-3"
-        aria-label="go back to homepage"
-        onClick={onClose}
+    <>
+      <Button
+        onClick={handleOpen}
+        className="mx-3 my-3 flex gap-1 py-1.5 px-3 tablet:w-40 tablet:mt-3 tablet:ml-15"
+        ariaLabel="Open search modal"
       >
-        <TbLetterX
-          className="font-bold text-[42px] place-self-center"
-          aria-hidden
-        />
-      </button>
-      <div className="absolute top-13 h-full w-full">
-        <div className="flex flex-col">
-          <label className=" ml-3 font-bold" htmlFor="search">
-            Finding Movies/TV shows
-          </label>
-          <input
-            type="text"
-            id="search"
-            ref={inputRef}
-            value={query}
-            className="p-0.5 rounded-sm w-[90%] place-self-center mt-1 text-dark bg-light  tablet:mt-3 tablet:w-60 tablet:ml-6 tablet:p-1 tablet:place-self-start"
-            placeholder="Type to search..."
-            onChange={(e) => setQuery(e.target.value)}
-          />
-        </div>
-
-        <div className="flex mt-2 justify-center tablet:mt-4" role="tablist">
-          <button
-            className={`w-10 h-fit py-1 px-2 rounded-l-md font-bold text-light ${isMovie ? "bg-cta" : "bg-cta-secondary"}`}
-            onClick={() => setIsMovie(true)}
-            role="tab"
-          >
-            Movie
-          </button>
-          <button
-            className={`w-10 h-fit py-1 px-2 rounded-r-md font-bold text-light ${!isMovie ? "bg-cta" : "bg-cta-secondary"}`}
-            onClick={() => setIsMovie(false)}
-            role="tab"
-          >
-            TV
-          </button>
-        </div>
-        <div className="w-full my-5 overflow-x-hidden">
-          {isLoading && query.length > 0 && (
-            <div className="pt-10 justify-self-center">
-              <PageLoader defaultColor="text-light!" />
+        <SearchIcon size={24} /> Find you want to watch...
+      </Button>
+      <dialog
+        ref={dialogRef}
+        onCancel={(e) => {
+          e.preventDefault(); // Stop native instant close so GSAP can animate out
+          handleClose();
+        }}
+        onClick={handleClose}
+        className="fixed inset-0 z-1 h-dvh w-screen m-0 max-w-none max-h-dvh bg-transparent text-foreground-primary backdrop:bg-black/50 overflow-hidden desktop:inset-25"
+      >
+        <span
+          className="sr-only"
+          aria-live="polite"
+          aria-label={
+            isSearchModalOpen
+              ? "Search modal is open"
+              : "Search modal is closed"
+          }
+        ></span>
+        <div
+          ref={innerContentRef}
+          onClick={(e) => e.stopPropagation()}
+          className="bg-primary fixed inset-0 h-[102dvh] w-full pt-6 pb-3 px-3 flex flex-col place-items-center overflow-y-auto  will-change-transform tablet:max-w-80 tablet:h-[85vh] tablet:bottom-10 tablet:top-auto tablet:rounded-2xl tablet:pt-3 tablet:mx-auto desktop:max-w-140"
+          style={{ transform: "translateY(102%)" }}
+        >
+          <div className="w-full mb-4 grid grid-cols-4 grid-rows-auto auto-rows-[80px] gap-1 place-items-center tablet:grid-cols-6 desktop:grid-cols-8">
+            <Button
+              onClick={handleClose}
+              className="p-1.5 col-start-4 row-start-1 tablet:col-start-6 desktop:col-start-8"
+              ariaLabel="Close search modal"
+            >
+              <CloseIcon size={24} aria-hidden />
+            </Button>
+            <label
+              className="font-bold text-lg col-start-1 col-span-3 row-start-1 self-end"
+              htmlFor="search"
+            >
+              Finding Movies/TV shows
+            </label>
+            <input
+              type="text"
+              id="search"
+              ref={inputRef}
+              value={query}
+              className="p-1.5 rounded-sm w-full col-start-1 col-span-full row-start-2 bg-white text-foreground-dark border-2 border-cta tablet:col-start-1 tablet:col-span-4 tablet:w-[80%]"
+              placeholder="Type to search..."
+              onChange={(e) => setQuery(e.target.value)}
+            />
+            <div
+              className="flex col-start-1 col-span-full row-start-3 justify-center items-center desktop:col-start-5 desktop:col-span-2 desktop:row-start-2 desktop:justify-self-start"
+              role="tablist"
+            >
+              <Button
+                className={`w-10 h-fit py-1 px-2 rounded-l-md rounded-r-none font-bold ${isMovie ? "bg-cta" : "bg-cta-secondary"}`}
+                onClick={() => setIsMovie(true)}
+                role="tab"
+              >
+                Movie
+              </Button>
+              <Button
+                className={`w-10 h-fit py-1 px-2 rounded-r-md rounded-l-none  font-bold ${!isMovie ? "bg-cta" : "bg-cta-secondary"}`}
+                onClick={() => setIsMovie(false)}
+                role="tab"
+              >
+                TV
+              </Button>
             </div>
-          )}
+          </div>
 
-          {/* Render results as soon as they exist */}
-          <ul className="my-5 grid gap-2 grid-cols-[repeat(auto-fill,minmax(260px,1fr))] place-items-center w-full desktop:gap-y-5 tablet:gap-5 tablet:px-8">
-            {normalized.map((item) => (
-              <li key={item.id}>
-                <Suspense fallback={<LoaderCardPoster />}>
-                  <QueryCard item={item} isMovie={isMovie} />
-                </Suspense>
-              </li>
-            ))}
-          </ul>
-          {error && <p className="text-center mt-10">An error has occured</p>}
-          {/* Only show empty state if not loading and query exists */}
-          {!isLoading && query.length > 0 && normalized.length === 0 && (
-            <p className="text-center mt-10">
-              No results found for &quot;{query}&quot;
-            </p>
-          )}
+          <div className="w-full flex-1">
+            {isLoading && query.length > 0 && (
+              <div className="py-10 flex justify-center">
+                <PageLoader />
+              </div>
+            )}
+
+            {/* CHANGED: Clean responsive grid for results */}
+            <ul className="my-2 grid grid-cols-2 gap-4 w-full tablet:grid-cols-3 desktop:grid-cols-4">
+              {normalized.map((item) => (
+                <li key={item.id} className="w-full list-none">
+                  <Suspense fallback={<LoaderCardPoster />}>
+                    <QueryCard item={item} isMovie={isMovie} />
+                  </Suspense>
+                </li>
+              ))}
+            </ul>
+
+            {error && (
+              <p className="text-center mt-10">An error has occurred</p>
+            )}
+
+            {!isLoading && query.length > 0 && normalized.length === 0 && (
+              <p className="text-center mt-10">
+                No results found for &quot;{query}&quot;
+              </p>
+            )}
+          </div>
         </div>
-      </div>
-    </motion.dialog>
+      </dialog>
+    </>
   );
 }

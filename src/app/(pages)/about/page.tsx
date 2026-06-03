@@ -1,14 +1,10 @@
-"use client";
-import { useTheme } from "@utils/zustand/theme";
 import Link from "next/link";
-import { BsLinkedin, BsGithub, BsGlobe } from "react-icons/bs";
+import { LinkedinIcon, GithubIcon, GlobeIcon } from "@utils/tabler-icons";
 import Image from "next/image";
+import PageWrapper from "../PageWrapper";
 export default function AboutPage() {
-  const theme = useTheme((state) => state.theme);
   return (
-    <main
-      className={`w-full ${theme === "light" ? "bg-light text-dark" : "bg-dark text-light"}`}
-    >
+    <PageWrapper>
       <div className="p-3 max-w-7xl flex flex-col items-center justify-self-center w-full ">
         <p className="mt-5 text-justify inline-block max-w-100">
           This website is for{" "}
@@ -46,7 +42,7 @@ export default function AboutPage() {
               target="_blank"
               aria-label="Navigate to the developer's Linkedin Profile"
             >
-              <BsLinkedin
+              <LinkedinIcon
                 className="text-heading-xl text-cta bg-white p-1 rounded-md"
                 aria-hidden
               />
@@ -58,7 +54,7 @@ export default function AboutPage() {
               target="_blank"
               aria-label="Navigate to the developer's Github Profile"
             >
-              <BsGithub
+              <GithubIcon
                 className="text-heading-xl text-cta bg-white p-1 rounded-md"
                 aria-hidden
               />
@@ -70,7 +66,7 @@ export default function AboutPage() {
               target="_blank"
               aria-label="Navigate to the developer's portfolio website"
             >
-              <BsGlobe
+              <GlobeIcon
                 className="text-heading-xl text-cta bg-white p-1 rounded-md"
                 aria-hidden
               />
@@ -78,6 +74,6 @@ export default function AboutPage() {
           </li>
         </ul>
       </div>
-    </main>
+    </PageWrapper>
   );
 }

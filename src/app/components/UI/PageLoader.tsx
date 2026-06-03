@@ -1,19 +1,20 @@
 "use client";
-import { AiOutlineLoading3Quarters } from "react-icons/ai";
-import { useTheme } from "@utils/zustand/theme";
+import { LoaderIcon } from "@utils/tabler-icons";
+import { useAppSelector } from "@hooks/redux-typed-hooks";
 export default function PageLoader({
   defaultColor,
 }: {
   defaultColor?: string;
 }) {
-  const theme = useTheme((state) => state.theme);
+  const theme = useAppSelector((state) => state.theme.theme);
   const hasDefaultColor = defaultColor !== undefined;
   return (
     <div
-      className={`flex gap-1 ${hasDefaultColor ? defaultColor : ""}  ${theme === "light" ? "text-dark" : "text-light"}`}
+      data-theme={theme}
+      className={`flex gap-1 ${hasDefaultColor ? defaultColor : ""}`}
     >
       <p>Loading</p>
-      <AiOutlineLoading3Quarters className="animate-spin" />
+      <LoaderIcon size={24} className="animate-spin" />
     </div>
   );
 }

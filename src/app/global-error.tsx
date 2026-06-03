@@ -2,17 +2,18 @@
 
 export default function GlobalError({
   error,
-  reset,
+  unstable_retry,
 }: {
   error: Error & { digest?: string };
-  reset: () => void;
+  unstable_retry: () => void;
 }) {
   return (
+    // global-error must include html and body tags
     <html>
       <body>
         <h2>Something went wrong!</h2>
-        <p>Message : {error.message}</p>
-        <button onClick={() => reset()}>Try again</button>
+        <p>{error.message}</p>
+        <button onClick={() => unstable_retry()}>Try again</button>
       </body>
     </html>
   );

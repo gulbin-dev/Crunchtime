@@ -1,38 +1,29 @@
 "use client";
 import Image from "next/image";
-import { normalizeData } from "@utils/normalizeData";
 import Link from "next/link";
 import "react-loading-skeleton/dist/skeleton.css";
 import useSWR from "swr";
-import { FetchResponse, MediaTypes } from "@utils/types";
+import { MediaTypes } from "@utils/types";
 import CardPosterImagePlaceholder from "@/app/components/UI/CardPosterImagePlaceholder";
 import LoaderCardPoster from "@/app/components/UI/LoaderCardPoster";
 import { fetcher } from "@utils/swr/fetcher";
 
-/**
- * CardPoster component
- * @param {string} catalog - media type (movie or tv)
- * @param {string} filteredGenre - filtered genre id
- * @returns {JSX.Element} - JSX element to render
- * @description - This component renders a list of movies or TV shows based on their popularity.
- * It also renders a "Show more" button if the list of movies or TV shows is not empty.
- */
 export default function CardPoster({
   catalog,
   filteredGenre,
+  isPending,
 }: {
   catalog: string;
   filteredGenre: string;
+  isPending: boolean;
 }) {
   const { data, isLoading, isValidating, error } = useSWR(
     `/api/catalog?mediaType=${catalog}&genre=${filteredGenre}`,
-    (url) => fetcher<FetchResponse<MediaTypes>>(url),
-    { suspense: true },
+    (url) => fetcher<MediaTypes>(url),
   );
-  const normalized = normalizeData(data);
-
-  const cards = normalized.slice(0, 10).map((item, i) => {
-    return isValidating || isLoading ? (
+  if (error && !data) return <LoaderCardPoster />;
+  const cards = data?.slice(0, 10).map((item, i) => {
+    return isValidating || isLoading || isPending ? (
       <li key={i}>
         <LoaderCardPoster />
       </li>
@@ -42,7 +33,7 @@ export default function CardPoster({
           href={`/preview/${catalog}/${item.id}`}
           aria-label={`View details for ${item.normalized?.normalizeTitle}`}
         >
-          <div className="rounded-xl relative min-w-20 h-35 text-dark bg-secondary">
+          <div className="group rounded-xl relative min-w-20 h-35">
             {item.poster_path === null ? (
               <div>
                 <CardPosterImagePlaceholder />
@@ -51,17 +42,17 @@ export default function CardPoster({
               <Image
                 src={`https://image.tmdb.org/t/p/w300${item.poster_path}`}
                 alt=""
-                width={160}
-                height={187}
-                className="rounded-t-xl aspect-6/7"
+                fill
+                sizes="(max-width: 640px) 100vw, 20vw"
+                className="object-cover rounded-xl"
               />
             )}
-            <h3 className="m-1">
-              {item.normalized !== undefined &&
-              item.normalized.normalizeTitle.length > 30
-                ? item.normalized?.normalizeTitle.slice(0, 30).concat("...")
-                : item.normalized?.normalizeTitle}
-            </h3>
+            <div className="text-foreground-dark bg-secondary/55 backdrop-blur-sm absolute bottom-0 w-full rounded-b-xl h-10 p-1.5 group-hover:bg-secondary transition-colors duration-300">
+              {" "}
+              <h3 className="line-clamp-2">
+                {item.normalized?.normalizeTitle}
+              </h3>
+            </div>
           </div>
         </Link>
       </li>

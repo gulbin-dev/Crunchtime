@@ -16,6 +16,7 @@ interface BaseData {
     normalizeMovie?: number;
     normalizeTV?: number;
   };
+  blurDataUrl: string;
 }
 
 //  tv specific data props
@@ -42,6 +43,11 @@ export interface Genre {
 //  array of Genre data type
 export interface Genres {
   genres: Genre[];
+}
+
+// Genre response type from useSWR
+export interface GenreResponseSWR {
+  data: Genres;
 }
 
 interface ProductionCompany {
@@ -239,12 +245,12 @@ export interface FetchResponse<T> {
 }
 
 export interface Response<T> {
-  data: T | undefined;
+  data: T | [];
   error: {
     state: boolean;
-    type: string;
-    status: number;
-    message: string;
+    type: string | undefined;
+    status: number | undefined;
+    message: string | undefined;
   };
 }
 

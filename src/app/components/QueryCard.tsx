@@ -1,6 +1,6 @@
-import CardPosterImagePlaceholder from "@/app/components/UI/CardPosterImagePlaceholder";
-import UI_Brick from "@/app/components/UI/UI_Brick";
-import genreAggregation from "@utils/genreAggregation";
+import CardPosterImagePlaceholder from "@components/UI/CardPosterImagePlaceholder";
+import UI_Brick from "@components/UI/UI_Brick";
+import genreAggregation from "@utils/aggregateGenre";
 import { Movie, TV, Genres } from "@utils/types";
 import Image from "next/image";
 import Link from "next/link";
@@ -15,45 +15,33 @@ export default function QueryCard({
   isMovie: boolean;
 }) {
   const mediaType = isMovie ? "movie" : "tv";
-  const { data: movie, error: movieError } = useSWR(
-    `/api/movie`,
-    (url) => fetcher<Genres>(url),
-    {
-      suspense: true,
-    },
-  );
-  const { data: tv, error: tvError } = useSWR(
-    `/api/tv`,
-    (url) => fetcher<Genres>(url),
-    {
-      suspense: true,
-    },
-  );
-  const genres = genreAggregation(movie, tv);
+  const { data: movie } = useSWR(`/api/movie`, (url) => fetcher<Genres>(url), {
+    suspense: true,
+  });
+  const { data: tv } = useSWR(`/api/tv`, (url) => fetcher<Genres>(url), {
+    suspense: true,
+  });
+  const genres = genreAggregation(movie.genres, tv.genres);
   const itemGenres = genres
     .filter((genre) => item.genre_ids.includes(genre.id))
     .map((item) => item.name);
   return (
     <Link href={`/preview/${mediaType}/${item.id}`}>
-      <div className="flex w-32.5 gap-1 bg-secondary text-dark rounded-xl tablet:w-40">
+      <div className="group flex flex-col relative gap-1 h-37 bg-secondary text-foreground-dark rounded-xl">
         {item.poster_path === null ? (
-          <div className="w-12.5 h-17.5">
-            <CardPosterImagePlaceholder />
-          </div>
+          <CardPosterImagePlaceholder />
         ) : (
           <Image
             src={`https://image.tmdb.org/t/p/w300${item.poster_path}`}
             alt=""
-            width={100}
-            height={140}
-            className="rounded-l-xl  aspect-6/7 object-cover"
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            className="aspect-6/7 object-cover rounded-xl"
           />
         )}
-        <div>
-          <h2 className="mt-2 text-wrap">
-            {item.normalized && item.normalized?.normalizeTitle.length > 25
-              ? item.normalized?.normalizeTitle.slice(0, 25).concat("...")
-              : item.normalized?.normalizeTitle}
+        <div className="px-1 absolute w-full top-auto bottom-0 z-1 backdrop-blur-sm bg-secondary/55 h-15 blur-effect rounded-b-xl group-hover:bg-secondary transition-colors duration-300">
+          <h2 className="mt-2 text-wrap line-clamp-2">
+            {item.normalized?.normalizeTitle}
           </h2>
           {itemGenres.length === 1 ? (
             <ul>

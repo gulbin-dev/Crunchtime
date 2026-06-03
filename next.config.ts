@@ -1,5 +1,5 @@
-import { execSync } from "child_process";
 import type { NextConfig } from "next";
+import withPlaiceholder from "@plaiceholder/next";
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -28,6 +28,7 @@ const nextConfig: NextConfig = {
     process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 32) ||
     process.env.GITHUB_SHA?.slice(0, 32) ||
     "local-build",
+  turbopack: {},
 };
 
-export default nextConfig;
+export default withPlaiceholder(nextConfig);

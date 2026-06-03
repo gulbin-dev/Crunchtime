@@ -1,5 +1,4 @@
 import {
-  FetchResponse,
   Preview,
   MediaTypes,
   Movie,
@@ -30,9 +29,9 @@ function helperFunction(data: Movie | TV | MoviePreview | TVPreview) {
   }
 }
 
-export function normalizeData(data: FetchResponse<MediaTypes>) {
-  if (!data?.results) return [];
-  return data.results.map((data) => {
+export function normalizeData(data: MediaTypes) {
+  if (!data) return [];
+  return data.map((data) => {
     const normalized = helperFunction(data);
     const result: TV | Movie = { ...data, normalized };
     return result;
