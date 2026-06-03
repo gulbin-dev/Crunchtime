@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.0 (2026-06-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* Break change for cleaner commits ([#18](https://github.com/gulbin-dev/Crunchtime/issues/18))
+
+### Bug Fixes
+
+* Break change for cleaner commits ([#18](https://github.com/gulbin-dev/Crunchtime/issues/18)) ([51d8635](https://github.com/gulbin-dev/Crunchtime/commit/51d8635e3d4ca2cc62e08a4dbf443283fab63ecf))
+
 ## [3.0.0](https://github.com/gulbin-dev/Crunchtime/compare/v2.0.0...v3.0.0) (2026-05-14)
 
 
