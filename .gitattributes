@@ -1,0 +1,5 @@
+.release-please-manifest.json merge=ours
+package.json merge=ours
+package-lock.json merge=ours
+CHANGELOG.md merge=ours
+release-please-config.json merge=ours

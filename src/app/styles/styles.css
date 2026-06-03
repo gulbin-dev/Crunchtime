@@ -1,0 +1,97 @@
+@layer components {
+  .hamburger-icon {
+    width: 48px;
+    height: 10px;
+    background-color: var(--color-cta);
+    border-radius: 8px;
+    position: absolute;
+  }
+  .tabs button:first-child {
+    border-radius: 8px 0 0 8px;
+  }
+  .tabs button:last-child {
+    border-radius: 0 8px 8px 0;
+  }
+  .tabs button {
+    color: var(--color-light);
+    padding: 0.3em 0.7em;
+    font-weight: bold;
+    width: 90px;
+  }
+  button[aria-selected="true"] {
+    background-color: var(--color-cta);
+  }
+  button[aria-selected="false"] {
+    background-color: var(--color-cta-secondary);
+  }
+  .title::after {
+    content: "";
+    display: flex;
+    flex-direction: column;
+
+    height: 4px;
+    background-color: var(--color-light);
+    font-size: 0.9em;
+    margin-left: 4px;
+  }
+  .iFrame {
+    aspect-ratio: 16/9;
+    font-size: 16px;
+    width: 100%;
+    height: auto;
+  }
+  .reviewBox::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 20px;
+    background: linear-gradient(transparent, var(--color-gray-shade));
+  }
+  .text-heading-lg[aria-current="page"] {
+    color: var(--color-cta);
+    text-decoration: underline;
+  }
+  .iframe-video {
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 1080px !important;
+  }
+}
+
+@layer utilities {
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-secondary);
+    border-radius: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-gray-shade);
+  }
+  ::-webkit-scrollbar {
+    width: 8px !important;
+    height: 8px !important;
+  }
+  a[data-nav-link] {
+    position: relative;
+    display: inline-block;
+    padding-bottom: 5px;
+  }
+  a[data-nav-link]:after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 5px;
+    background-color: var(--color-cta);
+    transition: width 0.3s ease-in-out;
+  }
+  a[data-nav-link]:hover:after {
+    width: 100%; /* Expands on hover */
+  }
+  a[data-nav-link].active {
+    color: var(--color-cta);
+    font-weight: bold;
+  }
+}
