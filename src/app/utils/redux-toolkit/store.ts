@@ -28,7 +28,7 @@ export const store = configureStore({
   enhancers: (getDefault) =>
     getDefault().concat(
       rememberEnhancer(storage, rememberedKeys, {
-        prefix: "@shop-ease-",
+        prefix: "@crunchtime-",
         serialize: (state) => JSON.stringify(state ?? {}),
         errorHandler: (error) => {
           console.error("Error during state persistence:", error);
