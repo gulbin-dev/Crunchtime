@@ -1,5 +1,5 @@
 "use client";
-import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import { LoaderIcon } from "@utils/tabler-icons";
 import { useAppSelector } from "@hooks/redux-typed-hooks";
 export default function PageLoader({
   defaultColor,
@@ -14,7 +14,7 @@ export default function PageLoader({
       className={`flex gap-1 ${hasDefaultColor ? defaultColor : ""}`}
     >
       <p>Loading</p>
-      <AiOutlineLoading3Quarters className="animate-spin" />
+      <LoaderIcon size={24} className="animate-spin" />
     </div>
   );
 }

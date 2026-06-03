@@ -1,10 +1,9 @@
 "use client";
-import { useState, use } from "react";
+import { useState, use, useTransition } from "react";
 import CardPoster from "./CardPoster";
 import { Response, Genre } from "@utils/types";
 import genreAggregation from "@utils/aggregateGenre";
 import { checkGenreName } from "@utils/checkGenreName";
-
 interface PropType {
   sectionTitle: string;
   genre: string[];
@@ -19,16 +18,21 @@ export default function CatalogSection({
   tvGenres,
 }: PropType) {
   const [catalog, setCatalog] = useState("movie");
+  const [isPending, startTransition] = useTransition();
+
   const movieGenreList = use(movieGenres);
   const tvGenreList = use(tvGenres);
+
   const fullGenreList = genreAggregation(movieGenreList.data, tvGenreList.data);
   const genreID = fullGenreList
     .filter((item) => checkGenreName(item, genre))
     .map((item) => item.id);
   const filteredGenre = genreID.join("|");
-
   const handleSwitch = (type: string) => {
-    setCatalog(type);
+    // 3. Wrap state updates in startTransition
+    startTransition(() => {
+      setCatalog(type);
+    });
   };
 
   return (
@@ -42,7 +46,7 @@ export default function CatalogSection({
         </h2>
         <div className="flex" role="tablist" aria-label="Select catalog type">
           <button
-            className={`w-13 h-6 py-0 px-2 rounded-l-md font-bold tablet:h-5 ${catalog === "movie" ? "bg-cta text-foreground-light" : "bg-cta-secondary text-foreground-dark"}`}
+            className={`w-13 h-6 py-0 px-2 rounded-l-md font-bold tablet:h-5 ${catalog === "movie" ? "bg-cta text-foreground-light" : "bg-cta-secondary text-foreground-dark"} ${isPending ? "opacity-80" : ""}`}
             onClick={() => handleSwitch("movie")}
             role="tab"
             aria-selected={catalog === "movie"}
@@ -51,7 +55,7 @@ export default function CatalogSection({
             Movie
           </button>
           <button
-            className={`w-13 h-6 py-1 px-2 rounded-r-md font-bold tablet:h-5 ${catalog === "tv" ? "bg-cta text-foreground-light" : "bg-cta-secondary text-foreground-dark"}`}
+            className={`w-13 h-6 py-1 px-2 rounded-r-md font-bold tablet:h-5 ${catalog === "tv" ? "bg-cta text-foreground-light" : "bg-cta-secondary text-foreground-dark"} ${isPending ? "opacity-80" : ""}`}
             onClick={() => handleSwitch("tv")}
             role="tab"
             aria-selected={catalog === "tv"}
@@ -66,7 +70,11 @@ export default function CatalogSection({
         role="tabpanel"
       >
         <ul className="flex gap-3 items-center w-full" aria-live="polite">
-          <CardPoster catalog={catalog} filteredGenre={filteredGenre} />
+          <CardPoster
+            catalog={catalog}
+            filteredGenre={filteredGenre}
+            isPending={isPending}
+          />
         </ul>
       </div>
     </section>

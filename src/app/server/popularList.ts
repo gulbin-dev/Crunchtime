@@ -1,6 +1,7 @@
 import { FetchResponse } from "@utils/types";
 import { Response, MediaTypes } from "../utils/types";
 import { cacheLife } from "next/cache";
+import { getPlaiceholder } from "plaiceholder";
 
 //  defining Authorization for every 'GET' request
 const options = {
@@ -34,8 +35,25 @@ export async function popularList(): Promise<Response<MediaTypes>> {
       };
     }
     const data: FetchResponse<MediaTypes> = await response.json();
+    const dataBuffered = data.results.map(async (item) => {
+      try {
+        const buffer = await fetch(
+          `https://image.tmdb.org/t/p/w1280${item.backdrop_path}`,
+        ).then(async (res) => Buffer.from(await res.arrayBuffer()));
+
+        const { base64 } = await getPlaiceholder(buffer);
+
+        return { ...item, blurDataUrl: base64 };
+      } catch (e: unknown) {
+        const error = e as Error;
+        console.error("Error processing base64: ", error.message);
+        return { ...item, blurDataUrl: "" };
+      }
+    });
+    const resolvedData = await Promise.all(dataBuffered);
+
     return {
-      data: data.results,
+      data: resolvedData,
       error: {
         state: false,
         type: undefined,

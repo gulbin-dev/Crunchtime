@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BsLinkedin, BsGithub, BsGlobe } from "react-icons/bs";
+import { LinkedinIcon, GithubIcon, GlobeIcon } from "@utils/tabler-icons";
 import Image from "next/image";
 import PageWrapper from "../PageWrapper";
 export default function AboutPage() {
@@ -42,7 +42,7 @@ export default function AboutPage() {
               target="_blank"
               aria-label="Navigate to the developer's Linkedin Profile"
             >
-              <BsLinkedin
+              <LinkedinIcon
                 className="text-heading-xl text-cta bg-white p-1 rounded-md"
                 aria-hidden
               />
@@ -54,7 +54,7 @@ export default function AboutPage() {
               target="_blank"
               aria-label="Navigate to the developer's Github Profile"
             >
-              <BsGithub
+              <GithubIcon
                 className="text-heading-xl text-cta bg-white p-1 rounded-md"
                 aria-hidden
               />
@@ -66,7 +66,7 @@ export default function AboutPage() {
               target="_blank"
               aria-label="Navigate to the developer's portfolio website"
             >
-              <BsGlobe
+              <GlobeIcon
                 className="text-heading-xl text-cta bg-white p-1 rounded-md"
                 aria-hidden
               />

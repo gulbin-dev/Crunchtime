@@ -2,14 +2,13 @@
 import Link from "next/link";
 import Image from "next/image";
 import { MediaTypes, Movie, TV, Genre, Response } from "@utils/types";
-import { FaStar } from "react-icons/fa6";
+import { RatingIcon } from "@utils/tabler-icons";
 import { use, useRef } from "react";
 import aggregateGenre from "@utils/aggregateGenre";
 import UI_Brick from "@components/UI/UI_Brick";
 import { gsap, useGSAP, Observer } from "@utils/gsap";
 import FiveTrendLoader from "@components/UI/FiveTrendLoader";
 import { memo } from "react";
-
 const FiveTrend = memo(function FiveTrend({
   trending,
   movieGenres,
@@ -120,7 +119,6 @@ const FiveTrend = memo(function FiveTrend({
     },
     { scope: heroDivRef },
   );
-
   if (fiveTrendError.state || movieGenreError.state || tvGenreError.state) {
     return (
       <div ref={heroDivRef}>
@@ -128,7 +126,6 @@ const FiveTrend = memo(function FiveTrend({
       </div>
     );
   }
-
   const genres = aggregateGenre(movieGenre, tvGenre);
 
   const normalize = fiveTrend
@@ -145,7 +142,6 @@ const FiveTrend = memo(function FiveTrend({
 
       return { ...item, title, genreNames };
     });
-
   return (
     <div ref={heroDivRef} className="absolute inset-0 text-foreground-light">
       {normalize.map((item) => {
@@ -159,8 +155,10 @@ const FiveTrend = memo(function FiveTrend({
               alt=""
               fill
               loading="eager"
+              placeholder="blur"
+              blurDataURL={item.blurDataUrl}
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              className="object-cover aspect-video w-full h-full"
+              className="object-cover"
             />
             <div className="absolute inset-0  bg-black/50 z-10" />
 
@@ -177,7 +175,7 @@ const FiveTrend = memo(function FiveTrend({
                   {item.title}
                 </Link>
                 <p className="flex items-center gap-0.5">
-                  <FaStar aria-label="rating" />
+                  <RatingIcon size={24} aria-label="rating" />
                   <span className="rating">{item.vote_average.toFixed(1)}</span>
                 </p>
 

@@ -4,7 +4,7 @@ import { FetchResponse, Review } from "@utils/types";
 import { redirect, RedirectType, useParams } from "next/navigation";
 import useSWR from "swr";
 import LineBreak from "@components/UI/LineBreak";
-import { IoChevronBack } from "react-icons/io5";
+import { BackIcon } from "@utils/tabler-icons";
 import PageLoader from "@components/UI/PageLoader";
 import { fetcher } from "@utils/swr/fetcher";
 import ReviewComponent from "@components/ReviewComponent";
@@ -55,7 +55,7 @@ export default function ReviewPage() {
             )
           }
         >
-          <IoChevronBack className="text-2xl" />
+          <BackIcon className="text-2xl" />
         </button>
         <MediaBanner />
         <div className="flex flex-col gap-2 mt-2 px-3 h-fit p-1">

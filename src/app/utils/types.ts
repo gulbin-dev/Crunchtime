@@ -16,6 +16,7 @@ interface BaseData {
     normalizeMovie?: number;
     normalizeTV?: number;
   };
+  blurDataUrl: string;
 }
 
 //  tv specific data props
