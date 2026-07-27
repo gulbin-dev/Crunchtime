@@ -10,16 +10,19 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "image.tmdb.org",
-        port: "",
         pathname: "/t/p/**",
         search: "",
       },
       {
         protocol: "https",
         hostname: "api.themoviedb.org",
-        port: "",
         pathname: "/3/genre/**",
         search: "",
+      },
+      {
+        protocol: "https",
+        hostname: "gravatar.com",
+        pathname: "/avatar/**",
       },
     ],
   },
