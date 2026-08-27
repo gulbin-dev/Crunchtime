@@ -1,80 +1,137 @@
 "use client";
-import { useState, use, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition, Suspense } from "react";
 import CardPoster from "./CardPoster";
-import { Response, Genre } from "@utils/types";
-import genreAggregation from "@utils/aggregateGenre";
+import LoaderCardPoster from "@components/UI/LoaderCardPoster";
+import useGenres from "@hooks/useGenres";
 import { checkGenreName } from "@utils/checkGenreName";
+import aggregateGenre from "@utils/aggregateGenre";
 interface PropType {
   sectionTitle: string;
   genre: string[];
-  movieGenres: Promise<Response<Genre[]>>;
-  tvGenres: Promise<Response<Genre[]>>;
 }
 
-export default function CatalogSection({
-  sectionTitle,
-  genre,
-  movieGenres,
-  tvGenres,
-}: PropType) {
-  const [catalog, setCatalog] = useState("movie");
-  const [isPending, startTransition] = useTransition();
+export default function CatalogSection({ sectionTitle, genre }: PropType) {
+  const movieGenreList = useGenres("movie"),
+    tvGenreList = useGenres("tv"),
+    pillRef = useRef<HTMLDivElement | null>(null),
+    movieBtnRef = useRef<HTMLButtonElement | null>(null),
+    tvBtnRef = useRef<HTMLButtonElement | null>(null),
+    [catalog, setCatalog] = useState("movie"),
+    [isPending, startTransition] = useTransition(),
+    [indicator, setIndicator] = useState<{ left: number; width: number }>({
+      left: 4,
+      width: 0,
+    });
 
-  const movieGenreList = use(movieGenres);
-  const tvGenreList = use(tvGenres);
+  const fullGenreList = aggregateGenre(
+    movieGenreList.genres,
+    tvGenreList.genres,
+  );
 
-  const fullGenreList = genreAggregation(movieGenreList.data, tvGenreList.data);
   const genreID = fullGenreList
     .filter((item) => checkGenreName(item, genre))
     .map((item) => item.id);
   const filteredGenre = genreID.join("|");
+
+  const updateIndicatorGeometry = (type: string) => {
+    const activeBtn = type === "movie" ? movieBtnRef.current : tvBtnRef.current;
+    if (!activeBtn || !pillRef.current) return;
+
+    const pillRect = pillRef.current.getBoundingClientRect();
+    const btnRect = activeBtn.getBoundingClientRect();
+
+    setIndicator({
+      left: btnRect.left - pillRect.left,
+      width: btnRect.width,
+    });
+  };
+
   const handleSwitch = (type: string) => {
-    // 3. Wrap state updates in startTransition
+    if (type === catalog) return;
+
+    updateIndicatorGeometry(type);
     startTransition(() => {
       setCatalog(type);
     });
   };
 
+  // Measures initial dimensions once on mount
+  useEffect(() => {
+    updateIndicatorGeometry(catalog);
+
+    // Recalculate on screen resize to handle responsive layouts
+    window.addEventListener("resize", () => updateIndicatorGeometry(catalog));
+    return () =>
+      window.removeEventListener("resize", () =>
+        updateIndicatorGeometry(catalog),
+      );
+  }, []);
+
   return (
     <section
-      className="mt-2 tablet:mt-8"
+      className="tablet:mt-10 desktop-large:max-w-210 desktop:max-w-180 mt-6 w-full place-self-center px-3"
       aria-labelledby={`catalog-${sectionTitle}`}
     >
-      <div className="flex flex-col gap-2 pt-2 pl-3 m-w-180 items-center tablet:flex-row desktop-large:pl-0">
-        <h2 className="text-heading-lg" id={`catalog-${sectionTitle}`}>
+      <div className="tablet:flex-row tablet:items-end tablet:justify-between flex flex-col items-start gap-3">
+        <h2
+          id={`catalog-${sectionTitle}`}
+          className="text-heading-lg section-title"
+        >
           {sectionTitle}
         </h2>
-        <div className="flex" role="tablist" aria-label="Select catalog type">
+        <div
+          className="tab-pill relative self-start"
+          role="tablist"
+          aria-label="Select catalog type"
+          ref={pillRef}
+        >
+          <span
+            className="tab-pill__indicator absolute transition-all duration-300 ease-out"
+            aria-hidden="true"
+            style={{ left: indicator.left, width: indicator.width }}
+          />
           <button
-            className={`w-13 h-6 py-0 px-2 rounded-l-md font-bold tablet:h-5 ${catalog === "movie" ? "bg-cta text-foreground-light" : "bg-cta-secondary text-foreground-dark"} ${isPending ? "opacity-80" : ""}`}
-            onClick={() => handleSwitch("movie")}
+            ref={movieBtnRef}
+            type="button"
             role="tab"
             aria-selected={catalog === "movie"}
             aria-label="List of movies"
+            className="tab-pill__btn relative z-10"
+            onClick={() => handleSwitch("movie")}
           >
             Movie
           </button>
           <button
-            className={`w-13 h-6 py-1 px-2 rounded-r-md font-bold tablet:h-5 ${catalog === "tv" ? "bg-cta text-foreground-light" : "bg-cta-secondary text-foreground-dark"} ${isPending ? "opacity-80" : ""}`}
-            onClick={() => handleSwitch("tv")}
+            ref={tvBtnRef}
+            type="button"
             role="tab"
             aria-selected={catalog === "tv"}
             aria-label="List of tv shows"
+            className={`tab-pill__btn relative z-10`}
+            onClick={() => handleSwitch("tv")}
           >
             TV
           </button>
         </div>
       </div>
       <div
-        className="w-full max-w-180 place-self-center h-42 p-3 relative overflow-y-hidden overflow-x-auto  scroller"
+        className="scroller catalog-row-rail desktop:max-w-180 desktop-large:max-w-210 relative mt-4 h-42 w-full place-self-center overflow-x-auto overflow-y-hidden py-3"
         role="tabpanel"
       >
-        <ul className="flex gap-3 items-center w-full" aria-live="polite">
-          <CardPoster
-            catalog={catalog}
-            filteredGenre={filteredGenre}
-            isPending={isPending}
-          />
+        <ul className="flex w-full items-stretch gap-4 pr-4" aria-live="polite">
+          <Suspense
+            fallback={Array.from({ length: 10 }, (_, index) => (
+              <li key={index}>
+                <LoaderCardPoster />
+              </li>
+            ))}
+          >
+            <CardPoster
+              catalog={catalog}
+              filteredGenre={filteredGenre}
+              isPending={isPending}
+            />
+          </Suspense>
         </ul>
       </div>
     </section>
