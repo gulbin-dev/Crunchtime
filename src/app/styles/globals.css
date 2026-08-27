@@ -92,18 +92,118 @@
   --breakpoint-tablet: 768px;
   --breakpoint-desktop: 1024px;
   --breakpoint-desktop-large: 1440px;
-  --color-primary: #dfdfdf;
+  --color-primary: #f8f8f8;
+  --color-primary-shade: #dfdfdf;
+  --color-dark-shade: #4b4b4b;
   --color-foreground-primary: #1f1f1f;
   --color-foreground-dark: #1f1f1f;
-  --color-foreground-light: #dfdfdf;
+  --color-foreground-light: #f8f8f8;
   --color-secondary: #ffb400;
+  --color-secondary-darker: #7f5a00;
   --color-cta: #00a5f9;
   --color-cta-secondary: #89d7ff;
   --color-gray-shade: #afafaf;
-  --text-heading-md: clamp(1.2em, 4vw, 1.4em);
-  --text-heading-lg: clamp(1.6em, 4vw, 2em);
-  --text-heading-xl: clamp(2.2em, 4vw, 2.6em);
-  --text-heading-sm: clamp(0.5em, 4vw, 1em);
+  --color-surface-elevated: #2a2a2a;
+  --shadow-card: 0 6px 18px -8px rgba(0, 0, 0, 0.45);
+  --shadow-card-hover: 0 14px 32px -10px rgba(0, 0, 0, 0.55);
+  --text-heading-sm: clamp(0.5em, 3vw, 1em);
+  --text-heading-md: clamp(1em, 3vw, 1.4em);
+  --text-heading-lg: clamp(1.4em, 3vw, 2em);
+  --text-heading-xl: clamp(2em, 3vw, 2.4em);
+
+  /* Custom animations for modern search UI */
+  --animate-orb-drift: orb-drift 9s ease-in-out infinite;
+  --animate-orb-drift-alt: orb-drift-alt 11s ease-in-out infinite;
+  --animate-gradient-pan: gradient-pan 8s ease infinite;
+  --animate-shimmer: shimmer 1.6s linear infinite;
+  --animate-loader-icon-spin: loader-icon-spin 0.9s linear infinite;
+  --animate-loader-ring-spin: loader-ring-spin 2.4s linear infinite;
+  --animate-loader-pulse-ring: loader-pulse-ring 1.8s ease-out infinite;
+  --animate-loader-pulse-dot: loader-pulse-dot 1.2s ease-in-out infinite;
+}
+
+@keyframes loader-icon-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes loader-ring-spin {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+@keyframes loader-pulse-ring {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0;
+  }
+}
+@keyframes loader-pulse-dot {
+  0%,
+  80%,
+  100% {
+    transform: scale(0.6);
+    opacity: 0.4;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes orb-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(20px, -25px, 0) scale(1.08);
+  }
+}
+
+@keyframes orb-drift-alt {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-25px, 20px, 0) scale(1.12);
+  }
+}
+
+@keyframes gradient-pan {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
 }
 [data-theme="dark"] {
   --color-primary: #1f1f1f;

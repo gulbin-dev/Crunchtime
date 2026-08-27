@@ -1,4 +1,11 @@
 @layer components {
+  /* overiding styles on the iframe embeded youtube video */
+  .iframe-video {
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 1080px !important;
+  }
+  /* mobile sidebar menu button */
   .hamburger-icon {
     width: 48px;
     height: 10px;
@@ -6,57 +13,222 @@
     border-radius: 8px;
     position: absolute;
   }
-  .tabs button:first-child {
-    border-radius: 8px 0 0 8px;
+  /* Section title accent underline */
+  .section-title {
+    position: relative;
+    display: inline-block;
   }
-  .tabs button:last-child {
-    border-radius: 0 8px 8px 0;
-  }
-  .tabs button {
-    color: var(--color-light);
-    padding: 0.3em 0.7em;
-    font-weight: bold;
-    width: 90px;
-  }
-  button[aria-selected="true"] {
-    background-color: var(--color-cta);
-  }
-  button[aria-selected="false"] {
-    background-color: var(--color-cta-secondary);
-  }
-  .title::after {
-    content: "";
-    display: flex;
-    flex-direction: column;
-
-    height: 4px;
-    background-color: var(--color-light);
-    font-size: 0.9em;
-    margin-left: 4px;
-  }
-  .iFrame {
-    aspect-ratio: 16/9;
-    font-size: 16px;
-    width: 100%;
-    height: auto;
-  }
-  .reviewBox::after {
+  .section-title::after {
     content: "";
     position: absolute;
-    bottom: 0;
     left: 0;
+    bottom: -6px;
+    width: 56px;
+    height: 4px;
+    border-radius: 999px;
+    background: linear-gradient(
+      90deg,
+      var(--color-cta),
+      var(--color-secondary)
+    );
+    transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .section-title:hover::after {
     width: 100%;
-    height: 20px;
-    background: linear-gradient(transparent, var(--color-gray-shade));
   }
-  .text-heading-lg[aria-current="page"] {
-    color: var(--color-cta);
-    text-decoration: underline;
+
+  /* Catalog tab pill with sliding indicator */
+  .tab-pill {
+    position: relative;
+    display: inline-flex;
+    padding: 4px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-cta-secondary), transparent);
+    border: 2px solid color-mix(in srgb, var(--color-cta) 35%, transparent);
   }
-  .iframe-video {
-    width: 100% !important;
-    height: 100% !important;
-    max-height: 1080px !important;
+  .tab-pill__btn {
+    position: relative;
+    z-index: 2;
+    padding: 0.4rem 1.1rem;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--color-foreground-light);
+    transition:
+      color 0.25s ease,
+      transform 0.25s ease;
+    border: 0;
+    cursor: pointer;
+  }
+  .tab-pill__btn:focus-visible {
+    outline: 2px solid var(--color-cta);
+    outline-offset: 2px;
+  }
+  .tab-pill__indicator {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--color-cta), #0084d4);
+    box-shadow:
+      0 6px 14px -4px color-mix(in srgb, var(--color-cta) 55%, transparent),
+      0 0 0 1px color-mix(in srgb, var(--color-cta) 40%, transparent) inset;
+    transition:
+      left 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+      width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Poster card */
+  .poster-card {
+    position: relative;
+    display: block;
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--color-surface-elevated);
+    box-shadow: var(--shadow-card);
+    transition:
+      transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform;
+  }
+  .poster-card:hover,
+  .poster-card:focus-visible {
+    transform: translateY(-4px) scale(1.025);
+    box-shadow: var(--shadow-card-hover);
+  }
+  .poster-card:hover .poster-card:focus-visible {
+    transform: scale(1.06);
+  }
+  .poster-card:hover .poster-card__shimmer,
+  .poster-card:focus-visible .poster-card__shimmer {
+    opacity: 1;
+  }
+  .poster-card:focus-visible {
+    outline: 2px solid var(--color-cta);
+    outline-offset: 3px;
+  }
+  .poster-card__img {
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform;
+    transform: scale(1.06);
+  }
+  .poster-card__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.92) 0%,
+      rgba(0, 0, 0, 0.55) 28%,
+      rgba(0, 0, 0, 0) 55%
+    );
+    pointer-events: none;
+  }
+  .poster-card__caption {
+    position: absolute;
+    inset: auto 0 0 0;
+    padding: 0.75rem 0.85rem 0.9rem;
+    color: #fff;
+    transform: translateY(8px);
+    opacity: 0;
+    transition:
+      transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 0.35s ease;
+  }
+  .poster-card:hover .poster-card__caption,
+  .poster-card:focus-visible .poster-card__caption {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  .poster-card__title {
+    font-family: var(--font-important);
+    font-weight: 700;
+    font-size: 0.95rem;
+    line-height: 1.25;
+    margin: 0 0 0.35rem;
+    display: -webkit-box;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  }
+  .poster-card__meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.85);
+  }
+  .poster-card__rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-secondary) 90%, transparent);
+    color: #1f1f1f;
+    font-weight: 700;
+    font-size: 0.78rem;
+  }
+  .poster-card__shimmer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    background: linear-gradient(
+      115deg,
+      transparent 30%,
+      rgba(255, 255, 255, 0.18) 50%,
+      transparent 70%
+    );
+    mix-blend-mode: screen;
+    transition: opacity 0.4s ease;
+  }
+
+  /* Poster placeholder when image is missing */
+  .poster-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: rgba(255, 255, 255, 0.85);
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-cta) 55%, transparent) 0%,
+      color-mix(in srgb, var(--color-secondary) 45%, transparent) 100%
+    );
+    background-size: 200% 200%;
+    animation: gradientPan 8s ease infinite;
+  }
+  .poster-placeholder__label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.85;
+  }
+
+  /* Catalog row — sized for the modernized CardPoster */
+  .catalog-row-rail .poster-card__title {
+    font-size: 0.92rem;
+  }
+
+  /* Soft focus ring (used by interactive cards) */
+  .focus-ring {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+  .focus-ring:focus-visible {
+    outline-color: var(--color-cta);
+  }
+
+  /* Fade-in animation helper for catalog items */
+  .card-fade-in {
+    animation: fade-in-up 0.45s ease-out both;
   }
 }
 
@@ -65,8 +237,11 @@
     background: var(--color-secondary);
     border-radius: 8px;
   }
+  ::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, var(--color-secondary) 80%, white);
+  }
   ::-webkit-scrollbar-track {
-    background: var(--color-gray-shade);
+    background: color-mix(in srgb, var(--color-gray-shade) 35%, transparent);
   }
   ::-webkit-scrollbar {
     width: 8px !important;
@@ -93,5 +268,14 @@
   a[data-nav-link].active {
     color: var(--color-cta);
     font-weight: bold;
+  }
+
+  /* Hide scrollbar but keep scrolling */
+  .scroller {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-secondary) transparent;
+  }
+  .scroller::-webkit-scrollbar {
+    height: 6px !important;
   }
 }
