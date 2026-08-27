@@ -22,6 +22,7 @@
     "react-lite-youtube-embed": "^3.5.1",
     "react-loading-skeleton": "^3.5.0",
     "react-redux": "^9.3.0",
+    "react-toastify": "^11.1.0",
     "redux-remember": "^6.0.2",
     "release-please": "^17.6.1",
     "swr": "^2.4.1"
@@ -33,6 +34,8 @@
     "@types/react-dom": "^19",
     "eslint": "^9.39.4",
     "eslint-config-next": "16.1.6",
+    "prettier": "^3.9.6",
+    "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^4.3.0",
     "typescript": "^5"
   }
