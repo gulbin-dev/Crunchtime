@@ -1,25 +1,24 @@
 "use client";
-import MediaBanner from "@components/MediaBanner";
-import { FetchResponse, Review } from "@utils/types";
 import { redirect, RedirectType, useParams } from "next/navigation";
 import useSWR from "swr";
+import PageWrapper from "@pages/PageWrapper";
 import LineBreak from "@components/UI/LineBreak";
-import { BackIcon } from "@utils/tabler-icons";
+import MediaBanner from "@components/MediaBanner";
 import PageLoader from "@components/UI/PageLoader";
-import { fetcher } from "@utils/swr/fetcher";
 import ReviewComponent from "@components/ReviewComponent";
-import PageWrapper from "@/app/(pages)/PageWrapper";
+import { fetcher } from "@utils/swr/fetcher";
+import { FetchResponse, Review } from "@utils/types";
+import { BackIcon } from "@utils/tabler-icons";
 
 export default function ReviewPage() {
   const params = useParams();
-  const { data, error } = useSWR(
+  const { data } = useSWR(
     `/preview/${params.media}/${params.id}/review/${params.reviewId}/api/review?media=${params.media}&id=${params.id}`,
     (url) => fetcher<FetchResponse<Review[]>>(url),
   );
-  if (error) console.error(error);
   if (!data)
     return (
-      <div className="w-full h-screen flex justify-center items-center">
+      <div className="flex h-screen w-full items-center justify-center">
         <PageLoader />
       </div>
     );
@@ -45,9 +44,9 @@ export default function ReviewPage() {
   });
   return (
     <PageWrapper>
-      <div className="max-w-180 place-self-center w-full">
+      <div className="w-full max-w-180 place-self-center">
         <button
-          className="ml-3 bg-cta rounded-full p-1"
+          className="bg-cta ml-3 rounded-full p-1"
           onClick={() =>
             redirect(
               `/preview/${params.media}/${params.id}`,
@@ -58,28 +57,28 @@ export default function ReviewPage() {
           <BackIcon className="text-2xl" />
         </button>
         <MediaBanner />
-        <div className="flex flex-col gap-2 mt-2 px-3 h-fit p-1">
+        <div className="mt-2 flex h-fit flex-col gap-2 p-1 px-3">
           <h1>
             Review by <em>{review[0].author}</em>
           </h1>
           {isUpdated ? (
-            <p className="text-xs flex gap-1 items-center">
-              <span className="italic p-0.5 rounded bg-gray-shade">
+            <p className="flex items-center gap-1 text-xs">
+              <span className="bg-gray-shade rounded p-0.5 italic">
                 Updated
               </span>
               {updateDate}
             </p>
           ) : (
-            <p className="text-xs ">{createdDate}</p>
+            <p className="text-xs">{createdDate}</p>
           )}
 
-          <q className="block text-pretty leading-relaxed ">
+          <q className="block leading-relaxed text-pretty">
             {review[0].content}
           </q>
         </div>
         <LineBreak />
         <div>
-          <h2 className="text-heading-md ml-3 tablet:mt-3">Other reviews</h2>
+          <h2 className="text-heading-md tablet:mt-3 ml-3">Other reviews</h2>
 
           <ReviewComponent
             media={params.media}
