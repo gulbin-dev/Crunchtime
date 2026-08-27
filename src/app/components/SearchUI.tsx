@@ -1,34 +1,47 @@
 "use client";
 
 import useSWR from "swr";
-import { useState, Suspense, useRef, useEffect } from "react";
+import { useState, Suspense, useRef, useEffect, useLayoutEffect } from "react";
 import { FetchResponse, MediaTypes } from "@utils/types";
-import QueryCard from "./QueryCard";
 import { normalizeData } from "@utils/normalizeData";
-import { CloseIcon, SearchIcon } from "@utils/tabler-icons";
-import LoaderCardPoster from "./UI/LoaderCardPoster";
-import PageLoader from "./UI/PageLoader";
+import { CloseIcon, SadIcon, SearchIcon } from "@utils/tabler-icons";
 import { fetcher } from "@utils/swr/fetcher";
 import { gsap, useGSAP } from "@utils/gsap";
+import QueryCard from "./QueryCard";
+import LoaderCardPoster from "./UI/LoaderCardPoster";
+import PageLoader from "./UI/PageLoader";
 import Button from "./UI/Button";
 
-export default function SearchUI() {
-  const [query, setQuery] = useState("");
-  const [isMovie, setIsMovie] = useState(true);
-  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const dialogRef = useRef<HTMLDialogElement | null>(null);
-  const innerContentRef = useRef<HTMLDivElement | null>(null);
-  const { data, isLoading, error } = useSWR(
-    (query.length > 0 && isMovie) || (query.length > 0 && !isMovie)
-      ? `/api/search?query=${query}&media=${isMovie ? "movie" : "tv"}`
-      : null,
-    (url: string) => fetcher<FetchResponse<MediaTypes>>(url),
-  );
+export default function SearchUI({
+  className,
+  inputId,
+}: {
+  className?: string;
+  inputId: string;
+}) {
+  const [query, setQuery] = useState(""),
+    [isMovie, setIsMovie] = useState(true),
+    [isSearchModalOpen, setIsSearchModalOpen] = useState(false),
+    inputRef = useRef<HTMLInputElement | null>(null),
+    dialogRef = useRef<HTMLDialogElement | null>(null),
+    innerContentRef = useRef<HTMLDivElement | null>(null),
+    indicatorRef = useRef<HTMLSpanElement | null>(null),
+    movieTabRef = useRef<HTMLButtonElement | null>(null),
+    tvTabRef = useRef<HTMLButtonElement | null>(null),
+    { data, isLoading, error } = useSWR(
+      query.length > 0
+        ? `/api/search?query=${query}&media=${isMovie ? "movie" : "tv"}`
+        : null,
+      (url: string) => fetcher<FetchResponse<MediaTypes>>(url),
+    );
+
   const normalized = data ? normalizeData(data.results) : [];
 
   useEffect(() => {
     document.body.style.overflow = isSearchModalOpen ? "hidden" : "auto";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
   }, [isSearchModalOpen]);
 
   // Open modal using native HTML5 API
@@ -51,10 +64,20 @@ export default function SearchUI() {
     });
   };
 
+  // Slide the segmented indicator under the active tab
+  useLayoutEffect(() => {
+    if (!isSearchModalOpen) return;
+    const target = isMovie ? movieTabRef.current : tvTabRef.current;
+    const indicator = indicatorRef.current;
+    if (!target || !indicator) return;
+    indicator.style.left = `${target.offsetLeft}px`;
+    indicator.style.width = `${target.offsetWidth}px`;
+  }, [isMovie, isSearchModalOpen]);
+
   useGSAP(() => {
     if (isSearchModalOpen) {
-      /* 
-        Using fromTo forces GSAP to instantly snap the element to a 102% offset 
+      /*
+        Using fromTo forces GSAP to instantly snap the element to a 102% offset
         on the GPU thread, killing the native browser layout-flash completely.
       */
       gsap.fromTo(
@@ -71,23 +94,25 @@ export default function SearchUI() {
       );
     }
   }, [isSearchModalOpen]);
+
   return (
-    <>
+    <div className={className}>
       <Button
         onClick={handleOpen}
-        className="mx-3 my-3 flex gap-1 py-1.5 px-3 tablet:w-40 tablet:mt-3 tablet:ml-15"
+        className="mx-3 my-3 flex items-center justify-center gap-0.75 rounded-xl px-3 py-1 font-light shadow-md hover:shadow-lg"
         ariaLabel="Open search modal"
       >
-        <SearchIcon size={24} /> Find you want to watch...
+        <SearchIcon size={18} className="text-white" />
+        <span className="text-white">Find what you want to watch</span>
       </Button>
       <dialog
         ref={dialogRef}
         onCancel={(e) => {
-          e.preventDefault(); // Stop native instant close so GSAP can animate out
+          e.preventDefault();
           handleClose();
         }}
         onClick={handleClose}
-        className="fixed inset-0 z-1 h-dvh w-screen m-0 max-w-none max-h-dvh bg-transparent text-foreground-primary backdrop:bg-black/50 overflow-hidden desktop:inset-25"
+        className="text-foreground-primary fixed inset-0 z-50 m-0 h-dvh max-h-dvh w-screen max-w-none overflow-hidden border-0 bg-transparent p-0 backdrop:bg-black/60 backdrop:backdrop-blur-md"
       >
         <span
           className="sr-only"
@@ -97,68 +122,126 @@ export default function SearchUI() {
               ? "Search modal is open"
               : "Search modal is closed"
           }
-        ></span>
+        />
+
         <div
           ref={innerContentRef}
           onClick={(e) => e.stopPropagation()}
-          className="bg-primary fixed inset-0 h-[102dvh] w-full pt-6 pb-3 px-3 flex flex-col place-items-center overflow-y-auto  will-change-transform tablet:max-w-80 tablet:h-[85vh] tablet:bottom-10 tablet:top-auto tablet:rounded-2xl tablet:pt-3 tablet:mx-auto desktop:max-w-140"
-          style={{ transform: "translateY(102%)" }}
+          className="tablet:inset-x-auto tablet:right-4 tablet:left-4 tablet:bottom-8 tablet:top-auto tablet:h-[85vh] tablet:max-w-80 tablet:rounded-3xl tablet:pt-6 tablet:mx-auto desktop:max-w-120 border-gray-shade/15 bg-primary/85 supports-backdrop-filter:bg-primary/70 tablet:border dark:bg-primary/85 dark:supports-backdrop-filter:bg-primary/70 fixed inset-x-0 top-0 bottom-0 z-10 flex h-dvh w-full flex-col items-stretch overflow-hidden border px-4 pt-6 pb-4 shadow-2xl backdrop-blur-2xl will-change-transform"
+          style={{
+            transform: isSearchModalOpen ? "translateY(0)" : "translateY(102%)",
+          }}
         >
-          <div className="w-full mb-4 grid grid-cols-4 grid-rows-auto auto-rows-[80px] gap-1 place-items-center tablet:grid-cols-6 desktop:grid-cols-8">
-            <Button
-              onClick={handleClose}
-              className="p-1.5 col-start-4 row-start-1 tablet:col-start-6 desktop:col-start-8"
-              ariaLabel="Close search modal"
-            >
-              <CloseIcon size={24} aria-hidden />
-            </Button>
-            <label
-              className="font-bold text-lg col-start-1 col-span-3 row-start-1 self-end"
-              htmlFor="search"
-            >
-              Finding Movies/TV shows
-            </label>
-            <input
-              type="text"
-              id="search"
-              ref={inputRef}
-              value={query}
-              className="p-1.5 rounded-sm w-full col-start-1 col-span-full row-start-2 bg-white text-foreground-dark border-2 border-cta tablet:col-start-1 tablet:col-span-4 tablet:w-[80%]"
-              placeholder="Type to search..."
-              onChange={(e) => setQuery(e.target.value)}
-            />
-            <div
-              className="flex col-start-1 col-span-full row-start-3 justify-center items-center desktop:col-start-5 desktop:col-span-2 desktop:row-start-2 desktop:justify-self-start"
-              role="tablist"
-            >
-              <Button
-                className={`w-10 h-fit py-1 px-2 rounded-l-md rounded-r-none font-bold ${isMovie ? "bg-cta" : "bg-cta-secondary"}`}
-                onClick={() => setIsMovie(true)}
-                role="tab"
+          {/* Decorative animated background orbs */}
+          <div
+            className="pointer-events-none absolute inset-0 overflow-hidden"
+            aria-hidden="true"
+          >
+            <div className="animate-orb-drift bg-cta/45 absolute -top-16 -right-12 h-56 w-56 rounded-full blur-3xl" />
+            <div className="animate-orb-drift-alt bg-secondary/35 absolute -bottom-16 -left-12 h-56 w-56 rounded-full blur-3xl" />
+            <div className="to-primary/40 absolute inset-0 bg-linear-to-b from-transparent via-transparent" />
+          </div>
+
+          {/* Header & Controls Section */}
+          <div className="relative z-10 mb-5 flex w-full flex-col gap-4">
+            {/* Title & Close Row */}
+            <div className="flex w-full items-center justify-between gap-3">
+              <div className="min-w-0">
+                <label
+                  className="text-heading-md text-foreground-primary block truncate font-bold tracking-tight"
+                  htmlFor={inputId}
+                >
+                  Explore
+                </label>
+                <p className="text-foreground-primary/70 mt-0.5 text-xs font-medium">
+                  Movies & TV Shows at your fingertips
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleClose}
+                aria-label="Close search modal"
+                className="hover:bg-cta/15 hover:text-cta border-gray-shade/20 bg-primary-shade/60 hover:border-cta/40 focus-visible:ring-cta/60 inline-flex size-6 shrink-0 items-center justify-center rounded-full border text-white transition-all duration-300 hover:rotate-90 focus:outline-none focus-visible:ring-2"
               >
-                Movie
-              </Button>
-              <Button
-                className={`w-10 h-fit py-1 px-2 rounded-r-md rounded-l-none  font-bold ${!isMovie ? "bg-cta" : "bg-cta-secondary"}`}
-                onClick={() => setIsMovie(false)}
-                role="tab"
+                <CloseIcon size={20} aria-hidden />
+              </button>
+            </div>
+
+            {/* Input Bar & Type Tabs Segment */}
+            <div className="grid w-full grid-cols-3 grid-rows-2 gap-3">
+              <div className="desktop:col-start-1 desktop:col-span-2 relative col-span-full row-start-1 flex">
+                <span
+                  className="peer-focus:text-cta pointer-events-none absolute top-1/2 left-2 -translate-y-1/2 text-mauve-800 transition-colors duration-200"
+                  aria-hidden="true"
+                >
+                  <SearchIcon size={18} />
+                </span>
+                <input
+                  type="text"
+                  id={inputId}
+                  ref={inputRef}
+                  value={query}
+                  className="peer border-gray-shade/50 hover:border-cta/40 focus:border-cta focus:ring-cta/20 w-full rounded-2xl border bg-white px-3 py-1.75 pl-5 text-sm font-medium text-black shadow-sm transition-all duration-200 placeholder:text-mauve-800 focus:bg-white focus:shadow-md focus:ring-4 focus:outline-none"
+                  placeholder="Search for a movie, show, or genre…"
+                  onChange={(e) => setQuery(e.target.value)}
+                />
+              </div>
+
+              {/* Sliding segmented toggle (Movies / TV) */}
+              <div
+                className="tab-pill desktop:col-start-3 desktop:row-start-1 relative col-span-full row-start-2 flex w-full self-start"
+                role="tablist"
+                aria-label="Media type"
               >
-                TV
-              </Button>
+                <span
+                  ref={indicatorRef}
+                  className="tab-pill__indicator"
+                  style={{ left: 1, width: 0 }}
+                  aria-hidden="true"
+                />
+                <button
+                  ref={movieTabRef}
+                  type="button"
+                  role="tab"
+                  aria-selected={isMovie}
+                  onClick={() => setIsMovie(true)}
+                  className="tab-pill__btn relative z-10 flex-1"
+                >
+                  Movies
+                </button>
+                <button
+                  ref={tvTabRef}
+                  type="button"
+                  role="tab"
+                  aria-selected={!isMovie}
+                  onClick={() => setIsMovie(false)}
+                  className="tab-pill__btn relative z-10 flex-1"
+                >
+                  TV Series
+                </button>
+              </div>
             </div>
           </div>
 
-          <div className="w-full flex-1">
+          {/* Content / Results Body */}
+          <div className="scroller relative z-10 min-h-0 w-full flex-1 overflow-y-auto pr-1">
             {isLoading && query.length > 0 && (
-              <div className="py-10 flex justify-center">
+              <div className="flex flex-col items-center justify-center gap-3 py-12">
                 <PageLoader />
+                <p className="text-foreground-primary/60 text-xs font-medium">
+                  Searching for &quot;{query}&quot;…
+                </p>
               </div>
             )}
 
-            {/* CHANGED: Clean responsive grid for results */}
-            <ul className="my-2 grid grid-cols-2 gap-4 w-full tablet:grid-cols-3 desktop:grid-cols-4">
-              {normalized.map((item) => (
-                <li key={item.id} className="w-full list-none">
+            {/* Grid Layout Cards */}
+            <ul className="tablet:grid-cols-3 desktop:grid-cols-4 my-1 grid w-full grid-cols-2 gap-3 pb-2">
+              {normalized.map((item, idx) => (
+                <li
+                  key={item.id}
+                  className="animate-fade-in-up w-full list-none"
+                  style={{ animationDelay: `${Math.min(idx, 11) * 35}ms` }}
+                >
                   <Suspense fallback={<LoaderCardPoster />}>
                     <QueryCard item={item} isMovie={isMovie} />
                   </Suspense>
@@ -166,18 +249,60 @@ export default function SearchUI() {
               ))}
             </ul>
 
-            {error && (
-              <p className="text-center mt-10">An error has occurred</p>
+            {/* Empty state */}
+            {!isLoading &&
+              !error &&
+              query.length > 0 &&
+              normalized.length === 0 && (
+                <div className="animate-fade-in-up mt-6 flex flex-col items-center justify-center gap-2 text-center">
+                  <div className="bg-cta/10 text-cta flex h-14 w-14 items-center justify-center rounded-full">
+                    <SadIcon size={28} />
+                  </div>
+                  <p className="text-foreground-primary text-sm font-semibold">
+                    No results found
+                  </p>
+                  <p className="text-foreground-primary/60 text-xs">
+                    Nothing matched &quot;
+                    <span className="text-foreground-primary font-semibold">
+                      {query}
+                    </span>
+                    &quot;. Try a different keyword.
+                  </p>
+                </div>
+              )}
+
+            {/* Idle hint state */}
+            {!isLoading && !error && query.length === 0 && (
+              <div className="animate-fade-in-up mt-8 flex flex-col items-center justify-center gap-2 text-center">
+                <div className="bg-cta/10 text-cta flex h-14 w-14 items-center justify-center rounded-full">
+                  <SearchIcon size={26} />
+                </div>
+                <p className="text-foreground-primary text-sm font-semibold">
+                  Start typing to search
+                </p>
+                <p className="text-foreground-primary/60 max-w-32.5 text-xs">
+                  Discover trending movies and series from our curated library.
+                </p>
+              </div>
             )}
 
-            {!isLoading && query.length > 0 && normalized.length === 0 && (
-              <p className="text-center mt-10">
-                No results found for &quot;{query}&quot;
-              </p>
+            {/* Error state */}
+            {error && (
+              <div className="animate-fade-in-up mt-6 flex flex-col items-center justify-center gap-2 text-center">
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-red-500/10 text-red-500">
+                  <SadIcon size={28} />
+                </div>
+                <p className="text-foreground-primary text-sm font-semibold">
+                  Something went wrong
+                </p>
+                <p className="text-foreground-primary/60 text-xs">
+                  An unexpected error has occurred. Please try again.
+                </p>
+              </div>
             )}
           </div>
         </div>
       </dialog>
-    </>
+    </div>
   );
 }

@@ -8,11 +8,11 @@ export default function Footer() {
   return (
     <footer
       data-theme={theme}
-      className="bg-primary text-foreground-primary py-4 w-full flex justify-center duration-300 transition-colors"
+      className="bg-primary text-foreground-primary flex w-full justify-center py-4 transition-colors duration-300"
     >
-      <div className="max-w-7xl w-full h-full px-3">
+      <div className="h-full w-full max-w-7xl px-3">
         <h2 className="text-heading-lg">CrunchTime</h2>
-        <p className="mt-1 tablet:mt-2 tablet:px-3">
+        <p className="tablet:mt-2 tablet:px-3 mt-1">
           A{" "}
           <span className="font-bold">
             <em>demo website</em>
@@ -20,10 +20,10 @@ export default function Footer() {
           made by a frontend React web developer Joshua Glenn R. Gulbin.
         </p>
 
-        <h3 className="mt-5 tablet:text-heading-md tablet:mt-4 tablet:pl-5">
+        <h3 className="tablet:text-heading-md tablet:mt-4 tablet:pl-5 mt-5">
           Social Links
         </h3>
-        <ul className="flex gap-2 p-3 tablet:mt-1 tablet:px-8">
+        <ul className="tablet:mt-1 tablet:px-8 flex gap-2 p-3">
           <li>
             <Link
               href="https://www.linkedin.com/in/joshua-glenn-gulbin/"

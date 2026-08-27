@@ -1,29 +1,27 @@
 "use client";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import useSWR from "swr";
 import { normalizePreviewData } from "@utils/normalizeData";
 import UI_Brick from "./UI/UI_Brick";
 import { handleRuntime } from "@utils/previewHelpers";
-import { Preview } from "@utils/types";
 import CardPosterImagePlaceholder from "./UI/CardPosterImagePlaceholder";
-import { fetcher } from "@utils/swr/fetcher";
-import { useAppSelector } from "../hooks/redux-typed-hooks";
+import { useAppSelector } from "@hooks/redux-typed-hooks";
+
+import usePreview from "@hooks/usePreviewDetails";
 export default function MediaBanner() {
   const params = useParams();
-  const { data } = useSWR(
-    `/preview/${params.media}/${params.id}/api/preview?media=${params.media}&id=${params.id}`,
-    (url) => fetcher<Preview>(url),
-    { suspense: true },
-  );
+  const { data, error } = usePreview(params.media, params.id, {
+    suspense: true,
+  });
   const theme = useAppSelector((state) => state.theme.theme);
   const normalize = data && normalizePreviewData(data);
-  if (normalize === undefined) return null;
-  const posterPath = normalize.images.posters[0]?.file_path;
+  if (!normalize) return null;
+  const posterPath = normalize.images?.posters?.[0]?.file_path ?? null;
+  console.log(error);
   return (
     <div
       data-theme={theme}
-      className="flex gap-2 px-3 relative"
+      className="relative grid grid-cols-[max-content_1fr] grid-rows-[auto_auto] gap-x-2"
       role="region"
       aria-labelledby={`title-banner ${normalize.media_type}`}
     >
@@ -33,40 +31,42 @@ export default function MediaBanner() {
           alt=""
           width={80}
           height={142}
-          className="aspect-9/16 object-contain place-self-start"
+          className="col-start-1 row-span-full aspect-9/16 place-self-start rounded-lg object-contain"
         />
       ) : (
-        <div className="w-10 h-14 aspect-9/16">
+        <div className="col-start-1 row-span-full aspect-9/16 h-14 w-10 rounded-lg">
           <CardPosterImagePlaceholder />
         </div>
       )}
 
-      <div className="w-full">
+      <div className="col-start-2 col-end-3 row-start-1 flex flex-col gap-1">
         <h1 className="text-heading-md font-bold">
           {normalize.normalized?.normalizeTitle}
         </h1>
         <p>
-          <span aria-label={`Rating: ${normalize.vote_average.toFixed(1)}`}>
-            {normalize.vote_average.toFixed(1)}
+          <span
+            aria-label={`Rating: ${normalize?.vote_average?.toFixed(1) ?? "N/A"}`}
+          >
+            {normalize?.vote_average?.toFixed(1) ?? "N/A"}
           </span>
-          <span className="before:mr-0.5 before:ml-0.5 before:content-['•'] ">
+          <span className="before:mr-0.5 before:ml-0.5 before:content-['•']">
             {"runtime" in normalize
-              ? handleRuntime(normalize.normalized?.normalizeMovie)
-              : `Season ${normalize.normalized?.normalizeTV}`}
+              ? handleRuntime(normalize.normalized?.runtime)
+              : `Season ${normalize.normalized?.number_of_seasons}`}
           </span>
         </p>
-        <ul className="flex flex-wrap gap-1 mt-1">
-          {normalize.genres.map((item) => (
-            <li key={item.id}>
-              <UI_Brick
-                value={item.name}
-                style="bg-gray-shade/40"
-                aria-label={`${item.name} genre`}
-              />
-            </li>
-          ))}
-        </ul>
       </div>
+      <ul className="col-start-2 row-start-2 mt-1 flex flex-wrap gap-1">
+        {normalize?.genres?.map((item) => (
+          <li key={item.id}>
+            <UI_Brick
+              value={item.name}
+              style="bg-gray-shade/40"
+              aria-label={`${item.name} genre`}
+            />
+          </li>
+        )) ?? null}
+      </ul>
     </div>
   );
 }

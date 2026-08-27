@@ -65,12 +65,12 @@ export default function ReviewComponent({
   // Safely extract results or fallback to empty array if data isn't fully loaded
   const reviewsList = data?.results || [];
   const filteredReviews = reviewsList
-    .slice(0, 5)
+    .slice(0, 3)
     .filter((item) => item.id !== (reviewID || ""));
 
   return (
     <>
-      <ul className="list-none p-0 relative px-3">
+      <ul className="grid max-h-180 list-none gap-4 overflow-x-hidden overflow-y-scroll p-0">
         {filteredReviews.map((item) => {
           const isUpdated = item.updated_at
             ? item.updated_at.length > 0
@@ -99,59 +99,64 @@ export default function ReviewComponent({
           return (
             <li
               key={item.id}
-              className="mt-3 border-b border-gray-shade/10 pb-4"
+              className="border-secondary/15 overflow-hidden rounded-[28px] border shadow-[0_20px_60px_-40px_rgba(0,0,0,0.75)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_22px_70px_-38px_rgba(0,165,249,0.18)]"
             >
-              <div className="bg-secondary text-foreground-dark rounded-sm px-2 pt-2 tablet:rounded-xl">
-                {/* FIX: Removed extra trailing '}' from the template string expression */}
-                <Link href={`/preview/${media}/${id}/review/${item.id}`}>
-                  <div className="grid grid-cols-[45px_1fr] gap-3">
-                    {checkerResult ? (
-                      <Image
-                        src={checkerResult}
-                        alt=""
-                        width={45}
-                        height={45}
-                        className="rounded-full h-[45px] object-cover"
-                      />
-                    ) : (
-                      <AvatarPlaceholder />
-                    )}
+              <div className="flex flex-col gap-4 p-5 sm:p-6">
+                <Link
+                  href={`/preview/${media}/${id}/review/${item.id}`}
+                  className="group"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="bg-secondary/10 ring-secondary/20 flex h-14 w-14 items-center justify-center overflow-hidden rounded-full ring-1">
+                      {checkerResult ? (
+                        <Image
+                          src={checkerResult}
+                          alt={item.author || "Reviewer avatar"}
+                          width={56}
+                          height={56}
+                          className="h-full w-full rounded-full object-cover"
+                        />
+                      ) : (
+                        <AvatarPlaceholder />
+                      )}
+                    </div>
 
-                    <div>
-                      <h4 className="font-bold">{item.author}</h4>
-                      {isUpdated ? (
-                        <p className="text-xs flex gap-1 items-center mt-1">
-                          {updateDate}
-                          <span className="italic rounded py-0.2 px-1">
+                    <div className="min-w-0">
+                      <h4 className="text-cta truncate text-base font-semibold transition-colors duration-200 group-hover:underline">
+                        {item.author}
+                      </h4>
+                      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+                        <span className="text-secondary bg-secondary/10 rounded-full px-2 py-1">
+                          {item.author_details.rating !== null
+                            ? item.author_details.rating
+                            : "No rating"}
+                        </span>
+                        <span>{isUpdated ? updateDate : createdDate}</span>
+                        {isUpdated && (
+                          <span className="bg-secondary/15 text-secondary rounded-full px-2 py-1">
                             Updated
                           </span>
-                        </p>
-                      ) : (
-                        <p className="text-xs mt-1">{createdDate}</p>
-                      )}
+                        )}
+                      </div>
                     </div>
                   </div>
                 </Link>
 
                 <div
-                  className="mt-3 pb-3"
+                  className="border-secondary/15 bg-secondary/5 rounded-3xl border p-4 text-sm leading-7"
                   data-id={item.id}
                   ref={(el) => {
                     if (el) containerRefs.current.set(item.id, el);
                     else containerRefs.current.delete(item.id);
                   }}
-                  style={{ lineHeight: "1.5" }}
+                  style={{ lineHeight: "1.75" }}
                 >
-                  {/* FIX: Added 'block' class so element obeys height boundaries */}
-                  <q className="italic text-pretty line-clamp-10">
-                    {item.content}
-                  </q>
+                  <q className="line-clamp-10 block italic">{item.content}</q>
 
-                  {/* CONDITIONAL RENDER: Only shows if text overflows line-clamp-10 */}
                   {isClampedMap[item.id] && (
                     <Link
                       href={`/preview/${media}/${id}/review/${item.id}`}
-                      className="bg-cta text-foreground-dark py-0.5 px-1.5 mt-1 inline-block rounded-2xl"
+                      className="bg-secondary hover:bg-secondary/90 mt-4 inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold transition"
                     >
                       Read more
                     </Link>
@@ -163,20 +168,24 @@ export default function ReviewComponent({
         })}
 
         {filteredReviews.length === 0 && (
-          <p className="italic text-center my-3">No reviews found.</p>
+          <li className="rounded-[28px] border border-white/10 bg-white/5 p-6 text-center text-sm">
+            No reviews found.
+          </li>
         )}
       </ul>
 
-      <div className="flex mt-3 justify-center gap-5 pb-3">
+      <div className="mt-5 flex flex-wrap justify-center gap-4 pb-3">
         <button
-          className="bg-cta py-0.5 px-1.5 rounded-md disabled:opacity-50"
+          type="button"
+          className="inline-flex items-center justify-center rounded-full bg-white/10 px-5 py-2.5 text-sm font-semibold transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-50"
           onClick={() => setPageIndex((prev) => Math.max(prev - 1, 1))}
           disabled={pageIndex === 1}
         >
           Previous
         </button>
         <button
-          className="bg-cta py-0.5 px-1.5 rounded-md"
+          type="button"
+          className="bg-cta hover:bg-cta/90 inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-semibold transition"
           onClick={() => setPageIndex((prev) => prev + 1)}
         >
           Next
