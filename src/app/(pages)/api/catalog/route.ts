@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { normalizeData } from "@utils/normalizeData";
+import { getPlaiceholder } from "plaiceholder";
 
 export async function GET(request: NextRequest) {
   // 1. Parse URL search parameters
@@ -25,7 +26,7 @@ export async function GET(request: NextRequest) {
           accept: "application/json",
           Authorization: `Bearer ${process.env.Read_Access_Token}`,
         },
-        // Revalidate every hour instead of using the broken revalidateTag call
+        // Revalidate every hour
         next: { revalidate: 3600 },
       },
     );
@@ -39,11 +40,31 @@ export async function GET(request: NextRequest) {
     // 3. Transform data using your utility functions
     const normalized = data.results ? normalizeData(data.results) : [];
 
+    // FIX: Map to an array of promises
+    const promises = normalized.map(async (item) => {
+      // Safely skip blur generation if backdrop image does not exist
+      if (!item.backdrop_path) {
+        return { ...item, blurDataUrl: "" };
+      }
+
+      try {
+        const buffer = await fetch(
+          `https://image.tmdb.org/t/p/w300${item.backdrop_path}`,
+        ).then(async (res) => Buffer.from(await res.arrayBuffer()));
+
+        const { base64 } = await getPlaiceholder(buffer);
+
+        return { ...item, blurDataUrl: base64 };
+      } catch {
+        return { ...item, blurDataUrl: "" };
+      }
+    });
+
+    const dataBuffered = await Promise.all(promises);
+
     // 5. Respond with the processed data structure
-    return NextResponse.json(normalized);
-  } catch (error: unknown) {
-    const err = error as Error;
-    console.error("Catalog API failure:", err.message);
+    return NextResponse.json(dataBuffered);
+  } catch {
     return NextResponse.json(
       { error: "Failed to process catalog data" },
       { status: 500 },
