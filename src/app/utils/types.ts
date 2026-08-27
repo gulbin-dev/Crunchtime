@@ -11,10 +11,10 @@ interface BaseData {
   media_type?: "movie" | "tv";
   vote_average: number;
   vote_count: number;
-  normalized?: {
+  normalized: {
     normalizeTitle: string;
-    normalizeMovie?: number;
-    normalizeTV?: number;
+    runtime?: number;
+    number_of_seasons?: number;
   };
   blurDataUrl: string;
 }
@@ -43,11 +43,6 @@ export interface Genre {
 //  array of Genre data type
 export interface Genres {
   genres: Genre[];
-}
-
-// Genre response type from useSWR
-export interface GenreResponseSWR {
-  data: Genres;
 }
 
 interface ProductionCompany {
@@ -124,7 +119,7 @@ export interface Review {
     name: string;
     username: string;
     avatar_path: string | null;
-    rating: number;
+    rating: number | null;
   };
   content: string;
   created_at: string;
@@ -200,7 +195,6 @@ interface BasePreview extends BaseData {
   similar: FetchResponse<MediaTypes>;
 }
 
-//  movie details
 export interface MoviePreview extends BasePreview {
   belongs_to_collection: string | null;
   budget: number;
@@ -232,6 +226,8 @@ export interface TVPreview extends BasePreview {
   origin_country: string[];
 }
 
+export type Preview = MoviePreview | TVPreview;
+
 //  array of Movie and TV data types
 export type MediaTypes = (Movie | TV)[];
 
@@ -244,6 +240,7 @@ export interface FetchResponse<T> {
   total_results: number;
 }
 
+// response on fetching data
 export interface Response<T> {
   data: T | [];
   error: {
@@ -254,4 +251,20 @@ export interface Response<T> {
   };
 }
 
-export type Preview = MoviePreview | TVPreview;
+// user account
+export interface UserAccount {
+  avatar: {
+    gravatar: {
+      hash: string;
+    };
+    tmdb: {
+      avatar_path: string | null;
+    };
+  };
+  id: number;
+  iso_639_1: string;
+  iso_3166_1: string;
+  name: string;
+  include_adult: boolean;
+  username: string;
+}
