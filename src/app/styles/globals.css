@@ -107,9 +107,9 @@
   --shadow-card: 0 6px 18px -8px rgba(0, 0, 0, 0.45);
   --shadow-card-hover: 0 14px 32px -10px rgba(0, 0, 0, 0.55);
   --text-heading-sm: clamp(0.5em, 3vw, 1em);
-  --text-heading-md: clamp(1em, 3vw, 1.4em);
-  --text-heading-lg: clamp(1.4em, 3vw, 2em);
-  --text-heading-xl: clamp(2em, 3vw, 2.4em);
+  --text-heading-md: clamp(1em, 3vw, 1.2em);
+  --text-heading-lg: clamp(1.4em, 3vw, 1.8em);
+  --text-heading-xl: clamp(2em, 3vw, 2.2em);
 
   /* Custom animations for modern search UI */
   --animate-orb-drift: orb-drift 9s ease-in-out infinite;
