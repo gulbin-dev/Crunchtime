@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const cookieStore = await cookies();
     const sessionId = cookieStore.get("tmdb_session_id")?.value;
@@ -13,6 +13,7 @@ export async function GET() {
           accept: "application/json",
           Authorization: `Bearer ${process.env.Read_Access_Token}`,
         },
+        signal: request.signal,
       },
     );
     const data = await response.json();

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_TMDB_BASE_URL}/authentication/token/new`,
@@ -10,6 +10,7 @@ export async function GET() {
           accept: "application/json",
           Authorization: `Bearer ${process.env.Read_Access_Token}`,
         },
+        signal: request.signal,
       },
     );
 
@@ -33,7 +34,6 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const requestToken = searchParams.get("request_token");
-
   if (!requestToken) {
     return NextResponse.json(
       { error: "Missing request token" },
@@ -52,11 +52,11 @@ export async function POST(request: NextRequest) {
           Authorization: `Bearer ${process.env.Read_Access_Token}`,
         },
         body: JSON.stringify({ request_token: requestToken }),
+        signal: request.signal,
       },
     );
 
     const data = await response.json();
-
     if (!response.ok) {
       return NextResponse.json(
         { error: data?.status_message ?? "Failed to create a session" },

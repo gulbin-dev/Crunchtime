@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // 2. Fetch the catalog data from TMDB
+    // 2. Fetch the catalog data from TMDB with AbortSignal support
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_TMDB_BASE_URL}/discover/${mediaType}?include_adult=false&include_video=false&language=en-US&page=1&sort_by=popularity.desc${genre ? `&with_genres=${genre}` : ""}`,
       {
@@ -26,6 +26,7 @@ export async function GET(request: NextRequest) {
           accept: "application/json",
           Authorization: `Bearer ${process.env.Read_Access_Token}`,
         },
+        signal: request.signal,
         // Revalidate every hour
         next: { revalidate: 3600 },
       },
@@ -50,6 +51,7 @@ export async function GET(request: NextRequest) {
       try {
         const buffer = await fetch(
           `https://image.tmdb.org/t/p/w300${item.backdrop_path}`,
+          { signal: request.signal },
         ).then(async (res) => Buffer.from(await res.arrayBuffer()));
 
         const { base64 } = await getPlaiceholder(buffer);
