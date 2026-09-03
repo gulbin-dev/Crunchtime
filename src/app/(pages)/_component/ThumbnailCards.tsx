@@ -25,7 +25,7 @@ export default function ThumbnailCards({
       <ul className="desktop:flex w-full gap-1.5 overflow-hidden p-3">
         {items.map((item, index) => {
           const imageSrc = item.poster_path
-            ? `https://image.tmdb.org/t/p/w1280${item.poster_path}`
+            ? `https://image.tmdb.org/t/p/w154${item.poster_path}`
             : null;
 
           return (
