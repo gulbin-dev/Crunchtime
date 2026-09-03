@@ -14,7 +14,7 @@ export default function Button({
   return (
     <button
       onClick={onClick}
-      className={`bg-cta hover:bg-cta-secondary transition-colors duration-300 text-foreground-dark rounded-lg ${className || ""}`}
+      className={`bg-cta hover:bg-cta-secondary rounded-lg px-1 py-2 text-white transition-colors duration-300 ${className || ""}`}
       role={role}
       aria-label={ariaLabel}
     >
