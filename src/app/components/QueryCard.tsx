@@ -6,15 +6,14 @@ import { RatingIcon } from "@utils/tabler-icons";
 
 export default function QueryCard({
   item,
-  isMovie,
+  catalog,
 }: {
   item: Movie | TV;
-  isMovie: boolean;
+  catalog: string;
 }) {
-  const mediaType = isMovie ? "movie" : "tv";
   return (
     <Link
-      href={`/preview/${mediaType}/${item.id}`}
+      href={`/preview/${catalog}/${item.id}`}
       aria-label={`View details for ${item.normalized?.normalizeTitle}`}
       className="poster-card focus-ring focus:outline-none"
       prefetch={false}
@@ -38,7 +37,7 @@ export default function QueryCard({
             placeholder={item.blurDataUrl ? "blur" : "empty"}
             blurDataURL={item.blurDataUrl}
             sizes="(max-width: 640px) 45vw, 20vw"
-            className="poster-card__img rounded-xl object-cover"
+            className="poster-card__img absolute rounded-xl object-cover"
           />
         </>
       )}
