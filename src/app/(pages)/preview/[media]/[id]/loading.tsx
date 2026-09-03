@@ -1,14 +1,7 @@
-"use client";
 import PageLoader from "@components/UI/PageLoader";
-import { useAppSelector } from "@hooks/redux-typed-hooks";
-
-export default function ReviewLoading() {
-  const theme = useAppSelector((state) => state.theme.theme);
+export default function Loading() {
   return (
-    <div
-      data-theme={theme}
-      className="h-screen w-full flex items-center justify-center"
-    >
+    <div className="bg-primary flex h-screen items-center justify-center">
       <PageLoader />
     </div>
   );
