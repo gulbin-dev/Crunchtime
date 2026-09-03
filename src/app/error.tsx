@@ -1,5 +1,6 @@
-"use client"; // Error boundaries must be Client Components
+"use client";
 
+import Button from "@components/UI/Button";
 export default function ErrorPage({
   error,
   unstable_retry,
@@ -11,14 +12,15 @@ export default function ErrorPage({
     <div className="flex h-screen flex-col items-center justify-center">
       <h2>Something went wrong!</h2>
       <p>{error.message}</p>
-      <button
+      <Button
+        className="mt-5"
         onClick={
           // Attempt to recover by re-fetching and re-rendering the segment
           () => unstable_retry()
         }
       >
         Try again
-      </button>
+      </Button>
     </div>
   );
 }
