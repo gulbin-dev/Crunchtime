@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useAppSelector } from "@hooks/redux-typed-hooks";
 import SearchUI from "./SearchUI";
 import FeatureFlagWrapper from "./FeatureFlag";
-import { SidebarButton, ThemeButton } from "@components/UI/SidebarModal";
+import { SidebarButton, ThemeButton } from "@components/UI/HeaderComponents";
 import Account from "@components/Account";
 
 export default function Header() {
