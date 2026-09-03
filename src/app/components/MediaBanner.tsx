@@ -10,19 +10,18 @@ import { useAppSelector } from "@hooks/redux-typed-hooks";
 import usePreview from "@hooks/usePreviewDetails";
 export default function MediaBanner() {
   const params = useParams();
-  const { data, error } = usePreview(params.media, params.id, {
+  const { data } = usePreview(params.media, params.id, {
     suspense: true,
   });
   const theme = useAppSelector((state) => state.theme.theme);
   const normalize = data && normalizePreviewData(data);
   if (!normalize) return null;
   const posterPath = normalize.images?.posters?.[0]?.file_path ?? null;
-  console.log(error);
+
   return (
     <div
       data-theme={theme}
       className="relative grid grid-cols-[max-content_1fr] grid-rows-[auto_auto] gap-x-2"
-      role="region"
       aria-labelledby={`title-banner ${normalize.media_type}`}
     >
       {posterPath ? (
