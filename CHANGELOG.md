@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.0.1](https://github.com/gulbin-dev/Crunchtime/compare/v1.0.0...v2.0.1) (2026-09-04)
+
+
+### Features
+
+* Account button is now wrapped in a FeatureFlagWrapper to conditionally render based on ACCOUNT_FLAG. ([e7258ed](https://github.com/gulbin-dev/Crunchtime/commit/e7258edfef4ac0d4e67c12673f9a54d0afef2891))
+
+
+### Bug Fixes
+
+* fix release tag as 2.0.1 ([53607d9](https://github.com/gulbin-dev/Crunchtime/commit/53607d9b713576dbbbff15edb5d1ea8dccbb526f))
+* Update release-please token to use GITHUB_TOKEN ([#23](https://github.com/gulbin-dev/Crunchtime/issues/23)) ([f6730aa](https://github.com/gulbin-dev/Crunchtime/commit/f6730aa3095bc36d0b0f365e8f02b5d19c6bcd50))
+
 ## 1.0.0 (2026-06-03)
 
 
