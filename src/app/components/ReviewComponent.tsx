@@ -1,34 +1,54 @@
 "use client";
 
-import { FetchResponse, Review } from "@utils/types";
-import Image from "next/image";
-import AvatarPlaceholder from "./UI/AvatarPlaceholder";
 import { useRef, useState, useEffect } from "react";
+import Image from "next/image";
 import useSWR from "swr";
-import { ParamValue } from "next/dist/server/request/params";
 import Link from "next/link";
+import { useInfiniteScroll } from "@hooks/useInfiniteScroll";
+import useFetchPreviewData from "@hooks/useFetchPreviewData";
+import { FetchResponse, Review } from "@utils/types";
 import { avatarPathChecker } from "@utils/avatarPathChecker";
 import { fetcher } from "@utils/swr/fetcher";
+import AvatarPlaceholder from "./UI/AvatarPlaceholder";
 
-export default function ReviewComponent({
-  media,
-  id,
-  reviewID,
-}: {
-  media: ParamValue;
-  id: ParamValue;
-  reviewID?: string;
-}) {
+export default function ReviewComponent({ reviewID }: { reviewID?: string }) {
+  const { params } = useFetchPreviewData();
   const [pageIndex, setPageIndex] = useState(1);
+  const [allReviews, setAllReviews] = useState<Review[]>([]);
+  const [hasMorePages, setHasMorePages] = useState(true);
+  const containerRefs = useRef<Map<string, HTMLDivElement>>(new Map()); // Explicitly typing the Map to handle HTMLDivElement
+  const [isClampedMap, setIsClampedMap] = useState<Record<string, boolean>>({});
+  const { displayedItems, sentinelRef, hasMore } = useInfiniteScroll(
+    allReviews.filter((item) => item.id !== (reviewID || "")),
+    { itemsPerPage: 5 },
+  );
   const { data } = useSWR(
-    `/preview/${media}/${id}/api/review?media=${media}&id=${id}&page=${pageIndex}`,
+    hasMorePages
+      ? `/preview/${params.media}/${params.id}/api/review?media=${params.media}&id=${params.id}&page=${pageIndex}`
+      : null,
     (url) => fetcher<FetchResponse<Review[]>>(url),
-    { suspense: true },
+    {
+      suspense: true,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    },
   );
 
-  // Explicitly typing the Map to handle HTMLDivElement
-  const containerRefs = useRef<Map<string, HTMLDivElement>>(new Map());
-  const [isClampedMap, setIsClampedMap] = useState<Record<string, boolean>>({});
+  // Accumulate reviews from all pages - using render-time state update
+  if (data?.results) {
+    const newReviews = data.results.filter(
+      (item) => !allReviews.some((existing) => existing.id === item.id),
+    );
+    if (newReviews.length > 0) {
+      setAllReviews((prev) => [...prev, ...newReviews]);
+    }
+
+    // Check if there are more pages
+    const totalPages = data.total_pages || 1;
+    if (pageIndex >= totalPages && hasMorePages) {
+      setHasMorePages(false);
+    }
+  }
 
   useEffect(() => {
     const observers: ResizeObserver[] = [];
@@ -59,19 +79,23 @@ export default function ReviewComponent({
     return () => {
       observers.forEach((obs) => obs.disconnect());
     };
-    // FIX: Depend on data so it reruns when SWR fetches new pages or items
-  }, [data]);
+  }, [allReviews]);
 
-  // Safely extract results or fallback to empty array if data isn't fully loaded
-  const reviewsList = data?.results || [];
-  const filteredReviews = reviewsList
-    .slice(0, 3)
-    .filter((item) => item.id !== (reviewID || ""));
+  // Load next page when sentinel is visible and there are more pages
+  useEffect(() => {
+    if (hasMore && hasMorePages && displayedItems.length >= allReviews.length) {
+      // We've displayed all current reviews, load next page
+      const timer = requestAnimationFrame(() => {
+        setPageIndex((prev) => prev + 1);
+      });
+      return () => cancelAnimationFrame(timer);
+    }
+  }, [hasMore, hasMorePages, displayedItems.length, allReviews.length]);
 
   return (
     <>
-      <ul className="grid max-h-180 list-none gap-4 overflow-x-hidden overflow-y-scroll p-0">
-        {filteredReviews.map((item) => {
+      <ul className="grid list-none gap-4">
+        {displayedItems.map((item) => {
           const isUpdated = item.updated_at
             ? item.updated_at.length > 0
             : false;
@@ -99,15 +123,15 @@ export default function ReviewComponent({
           return (
             <li
               key={item.id}
-              className="border-secondary/15 overflow-hidden rounded-[28px] border shadow-[0_20px_60px_-40px_rgba(0,0,0,0.75)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_22px_70px_-38px_rgba(0,165,249,0.18)]"
+              className="border-secondary/15 desktop:rounded-[28px] overflow-hidden rounded-none border shadow-[0_20px_60px_-40px_rgba(0,0,0,0.75)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_22px_70px_-38px_rgba(0,165,249,0.18)]"
             >
-              <div className="flex flex-col gap-4 p-5 sm:p-6">
+              <div className="flex flex-col gap-4 p-3">
                 <Link
-                  href={`/preview/${media}/${id}/review/${item.id}`}
+                  href={`/preview/${params.media}/${params.id}/review/${item.id}`}
                   className="group"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="bg-secondary/10 ring-secondary/20 flex h-14 w-14 items-center justify-center overflow-hidden rounded-full ring-1">
+                    <div className="bg-secondary/10 ring-secondary/20 flex h-8 w-8 items-center justify-center overflow-hidden rounded-full ring-1">
                       {checkerResult ? (
                         <Image
                           src={checkerResult}
@@ -143,19 +167,18 @@ export default function ReviewComponent({
                 </Link>
 
                 <div
-                  className="border-secondary/15 bg-secondary/5 rounded-3xl border p-4 text-sm leading-7"
+                  className="border-secondary/15 bg-secondary/5 rounded-3xl border p-4 text-sm leading-4"
                   data-id={item.id}
                   ref={(el) => {
                     if (el) containerRefs.current.set(item.id, el);
                     else containerRefs.current.delete(item.id);
                   }}
-                  style={{ lineHeight: "1.75" }}
                 >
-                  <q className="line-clamp-10 block italic">{item.content}</q>
+                  <q className="line-clamp-5 italic">{item.content}</q>
 
                   {isClampedMap[item.id] && (
                     <Link
-                      href={`/preview/${media}/${id}/review/${item.id}`}
+                      href={`/preview/${params.media}/${params.id}/review/${item.id}`}
                       className="bg-secondary hover:bg-secondary/90 mt-4 inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold transition"
                     >
                       Read more
@@ -167,30 +190,27 @@ export default function ReviewComponent({
           );
         })}
 
-        {filteredReviews.length === 0 && (
+        {displayedItems.length === 0 && (
           <li className="rounded-[28px] border border-white/10 bg-white/5 p-6 text-center text-sm">
             No reviews found.
           </li>
         )}
       </ul>
 
-      <div className="mt-5 flex flex-wrap justify-center gap-4 pb-3">
-        <button
-          type="button"
-          className="inline-flex items-center justify-center rounded-full bg-white/10 px-5 py-2.5 text-sm font-semibold transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-50"
-          onClick={() => setPageIndex((prev) => Math.max(prev - 1, 1))}
-          disabled={pageIndex === 1}
+      {hasMore && (
+        <div
+          ref={sentinelRef}
+          className="mt-8 flex justify-center py-4"
+          role="status"
+          aria-label="Loading more reviews"
         >
-          Previous
-        </button>
-        <button
-          type="button"
-          className="bg-cta hover:bg-cta/90 inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-semibold transition"
-          onClick={() => setPageIndex((prev) => prev + 1)}
-        >
-          Next
-        </button>
-      </div>
+          <div className="inline-flex gap-2">
+            <div className="bg-secondary h-2 w-2 animate-bounce rounded-full"></div>
+            <div className="bg-secondary animation-delay-100 h-2 w-2 animate-bounce rounded-full"></div>
+            <div className="bg-secondary animation-delay-200 h-2 w-2 animate-bounce rounded-full"></div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
