@@ -1,7 +1,6 @@
 import FiveTrend from "./_component/FiveTrend";
 import { Suspense } from "react";
 import FiveTrendLoader from "@components/UI/FiveTrendLoader";
-import SearchUI from "@components/SearchUI";
 import PageWrapper from "./PageWrapper";
 import CatalogSection from "./_component/CatalogSection";
 import Button from "@components/UI/Button";
@@ -65,13 +64,6 @@ const features = [
 export default function Home() {
   return (
     <PageWrapper>
-      <h1 className="text-heading-lg tablet:pt-5 tablet:ml-10 text-foreground-primary desktop:absolute tablet:text-heading-lg tablet:text-start desktop:text-white pointer-events-none relative z-20 px-3 pt-2 font-bold text-pretty">
-        Discover worth to watch movies & TV shows
-      </h1>
-      <SearchUI
-        className="desktop:hidden block"
-        inputId="search-on-small-screen"
-      />
       <section
         className="relative h-96 w-full overflow-hidden px-3"
         aria-labelledby="popular-five"
@@ -93,14 +85,17 @@ export default function Home() {
       <CatalogSection sectionTitle="Animation" genre={["Animation"]} />
       <CatalogSection sectionTitle="Drama" genre={["Drama"]} />
 
-      <div className="mt-4 flex justify-center">
-        <Link
-          href="/catalog"
-          className="bg-cta hover:bg-cta-secondary h-fit w-fit rounded-xl p-3 font-bold text-nowrap"
-        >
-          DISCOVER MORE
-        </Link>
-      </div>
+      <FeatureFlagWrapper featureFlag="CATALOG_FLAG">
+        <div className="mt-4 flex justify-center">
+          <Link
+            href="/catalog"
+            className="bg-cta hover:bg-cta-secondary h-fit w-fit rounded-xl p-3 font-bold text-nowrap"
+          >
+            DISCOVER MORE
+          </Link>
+        </div>
+      </FeatureFlagWrapper>
+
       <section
         className="bg-foreground-primary dark:bg-dark-shade text-foreground-light tablet:px-10 mt-12 px-3 py-12"
         aria-labelledby="discover-more"
@@ -150,7 +145,10 @@ export default function Home() {
                 <IconCheck className="text-secondary" size={20} stroke={2.5} />
                 <p className="text-sm">Your next great watch starts here.</p>
               </div>
-              <Button className="w-fit px-5 py-3 font-bold">
+              <Button
+                config={{ type: "primary" }}
+                className="w-fit px-5 py-3 font-bold"
+              >
                 START YOUR LIST
               </Button>
             </div>
