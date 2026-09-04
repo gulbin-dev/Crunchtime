@@ -9,7 +9,7 @@ export default function UI_Brick({ value, ariaLabel, style }: Prop) {
   if (typeof value === "string") {
     return (
       <p
-        className={`w-fit border py-0.2 px-1 rounded-xl aria-label ${style}`}
+        className={`py-0.2 aria-label bg-secondary text-foreground-dark w-fit rounded-xl px-1 ${style}`}
         aria-label={ariaLabel || ""}
       >
         {value}
@@ -18,7 +18,9 @@ export default function UI_Brick({ value, ariaLabel, style }: Prop) {
   }
   return value.map((text) => (
     <li key={text}>
-      <p className={`w-fit border py-0.2 px-1 rounded-xl italic ${style}`}>
+      <p
+        className={`py-0.2 bg-secondary text-foreground-dark w-fit rounded-xl px-1 italic ${style}`}
+      >
         {text}
       </p>
     </li>

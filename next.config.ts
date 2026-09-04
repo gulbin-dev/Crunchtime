@@ -10,16 +10,19 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "image.tmdb.org",
-        port: "",
         pathname: "/t/p/**",
         search: "",
       },
       {
         protocol: "https",
         hostname: "api.themoviedb.org",
-        port: "",
         pathname: "/3/genre/**",
         search: "",
+      },
+      {
+        protocol: "https",
+        hostname: "gravatar.com",
+        pathname: "/avatar/**",
       },
     ],
   },
@@ -29,6 +32,21 @@ const nextConfig: NextConfig = {
     process.env.GITHUB_SHA?.slice(0, 32) ||
     "local-build",
   turbopack: {},
+
+  async rewrites() {
+    // If the feature is disabled, rewrite the route to a 404 page
+    if (process.env.NEXT_PUBLIC_FEATURE_CATALOG_FLAG !== "true") {
+      return {
+        beforeFiles: [
+          {
+            source: "/catalog/:path*",
+            destination: "/404",
+          },
+        ],
+      };
+    }
+    return [];
+  },
 };
 
 export default withPlaiceholder(nextConfig);

@@ -10,19 +10,29 @@ import {
   IconWorldFilled,
   IconPhotoX,
   IconChevronLeft,
+  IconUserCircle,
+  IconCheck,
+  IconShieldCheckFilled,
+  IconSparklesFilled,
+  IconMoodSad2,
 } from "@tabler/icons-react";
 
-const LightModeIcon = IconSunFilled;
-const DarkModeIcon = IconMoonFilled;
-const CloseIcon = IconX;
-const SearchIcon = IconSearch;
-const LoaderIcon = IconLoader2;
-const RatingIcon = IconStarFilled;
-const GithubIcon = IconBrandGithubFilled;
-const LinkedinIcon = IconBrandLinkedinFilled;
-const GlobeIcon = IconWorldFilled;
-const ImageOffIcon = IconPhotoX;
-const BackIcon = IconChevronLeft;
+const LightModeIcon = IconSunFilled,
+  DarkModeIcon = IconMoonFilled,
+  CloseIcon = IconX,
+  SearchIcon = IconSearch,
+  LoaderIcon = IconLoader2,
+  RatingIcon = IconStarFilled,
+  GithubIcon = IconBrandGithubFilled,
+  LinkedinIcon = IconBrandLinkedinFilled,
+  GlobeIcon = IconWorldFilled,
+  ImageOffIcon = IconPhotoX,
+  AccountIcon = IconUserCircle,
+  CheckIcon = IconCheck,
+  ShieldCheckIcon = IconShieldCheckFilled,
+  SparkleIcon = IconSparklesFilled,
+  SadIcon = IconMoodSad2,
+  BackIcon = IconChevronLeft;
 
 export {
   LightModeIcon,
@@ -36,4 +46,9 @@ export {
   GlobeIcon,
   ImageOffIcon,
   BackIcon,
+  AccountIcon,
+  ShieldCheckIcon,
+  CheckIcon,
+  SparkleIcon,
+  SadIcon,
 };

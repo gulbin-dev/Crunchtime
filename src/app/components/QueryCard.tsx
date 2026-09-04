@@ -1,62 +1,58 @@
-import CardPosterImagePlaceholder from "@components/UI/CardPosterImagePlaceholder";
-import UI_Brick from "@components/UI/UI_Brick";
-import genreAggregation from "@utils/aggregateGenre";
-import { Movie, TV, Genres } from "@utils/types";
 import Image from "next/image";
 import Link from "next/link";
-import useSWR from "swr";
-import { fetcher } from "@utils/swr/fetcher";
+import CardPosterImagePlaceholder from "@components/UI/CardPosterImagePlaceholder";
+import { Movie, TV } from "@utils/types";
+import { RatingIcon } from "@utils/tabler-icons";
 
 export default function QueryCard({
   item,
-  isMovie,
+  catalog,
 }: {
   item: Movie | TV;
-  isMovie: boolean;
+  catalog: string;
 }) {
-  const mediaType = isMovie ? "movie" : "tv";
-  const { data: movie } = useSWR(`/api/movie`, (url) => fetcher<Genres>(url), {
-    suspense: true,
-  });
-  const { data: tv } = useSWR(`/api/tv`, (url) => fetcher<Genres>(url), {
-    suspense: true,
-  });
-  const genres = genreAggregation(movie.genres, tv.genres);
-  const itemGenres = genres
-    .filter((genre) => item.genre_ids.includes(genre.id))
-    .map((item) => item.name);
   return (
-    <Link href={`/preview/${mediaType}/${item.id}`}>
-      <div className="group flex flex-col relative gap-1 h-37 bg-secondary text-foreground-dark rounded-xl">
-        {item.poster_path === null ? (
+    <Link
+      href={`/preview/${catalog}/${item.id}`}
+      aria-label={`View details for ${item.normalized?.normalizeTitle}`}
+      className="poster-card focus-ring focus:outline-none"
+      prefetch={false}
+    >
+      {item.poster_path === null ? (
+        <div className="poster-placeholder">
           <CardPosterImagePlaceholder />
-        ) : (
+          <span className="poster-placeholder__label">No Poster</span>
+        </div>
+      ) : (
+        <>
           <Image
             src={`https://image.tmdb.org/t/p/w300${item.poster_path}`}
-            alt=""
+            alt={
+              item.normalized?.normalizeTitle
+                ? `Poster for ${item.normalized.normalizeTitle}`
+                : "Poster"
+            }
             fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-            className="aspect-6/7 object-cover rounded-xl"
+            decoding="async"
+            placeholder={item.blurDataUrl ? "blur" : "empty"}
+            blurDataURL={item.blurDataUrl}
+            sizes="(max-width: 640px) 45vw, 20vw"
+            className="poster-card__img absolute rounded-xl object-cover"
           />
-        )}
-        <div className="px-1 absolute w-full top-auto bottom-0 z-1 backdrop-blur-sm bg-secondary/55 h-15 blur-effect rounded-b-xl group-hover:bg-secondary transition-colors duration-300">
-          <h2 className="mt-2 text-wrap line-clamp-2">
-            {item.normalized?.normalizeTitle}
-          </h2>
-          {itemGenres.length === 1 ? (
-            <ul>
-              <UI_Brick value={itemGenres} style="text-heading-sm mt-1" />
-            </ul>
-          ) : itemGenres.length > 1 ? (
-            <div className="flex gap-1">
-              <ul>
-                <UI_Brick value={itemGenres[0]} style="text-heading-sm mt-1" />
-              </ul>
-
-              <div className="w-fit border py-0.2 px-1 rounded-xl text-heading-sm mt-1">
-                <p>+{itemGenres.length - 1}</p>
-              </div>
-            </div>
+        </>
+      )}
+      <span className="poster-card__shimmer" aria-hidden="true" />
+      <div className="poster-card__overlay" aria-hidden="true" />
+      <div className="poster-card__caption text-foreground-dark bg-secondary/55 group-hover:bg-secondary absolute bottom-0 w-full rounded-b-xl p-1.5 backdrop-blur-sm transition-colors duration-300">
+        <h3 className="poster-card__title">
+          {item.normalized?.normalizeTitle}
+        </h3>
+        <div className="poster-card__meta">
+          {item.vote_average ? (
+            <span className="poster-card__rating">
+              <RatingIcon size={12} aria-hidden="true" />
+              {item.vote_average.toFixed(1)}
+            </span>
           ) : null}
         </div>
       </div>

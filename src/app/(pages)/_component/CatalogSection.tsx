@@ -1,80 +1,57 @@
 "use client";
-import { useState, use, useTransition } from "react";
-import CardPoster from "./CardPoster";
-import { Response, Genre } from "@utils/types";
-import genreAggregation from "@utils/aggregateGenre";
+import CardList from "./CardList";
+import useGenres from "@hooks/useGenres";
+import { useCatalogState } from "@hooks/useCatalogState";
 import { checkGenreName } from "@utils/checkGenreName";
+import aggregateGenre from "@utils/aggregateGenre";
+import ButtonTabPill from "@components/ButtonTabPill";
 interface PropType {
   sectionTitle: string;
   genre: string[];
-  movieGenres: Promise<Response<Genre[]>>;
-  tvGenres: Promise<Response<Genre[]>>;
 }
 
-export default function CatalogSection({
-  sectionTitle,
-  genre,
-  movieGenres,
-  tvGenres,
-}: PropType) {
-  const [catalog, setCatalog] = useState("movie");
-  const [isPending, startTransition] = useTransition();
+export default function CatalogSection({ sectionTitle, genre }: PropType) {
+  const { catalog, setCatalog } = useCatalogState();
+  const movieGenreList = useGenres("movie");
+  const tvGenreList = useGenres("tv");
 
-  const movieGenreList = use(movieGenres);
-  const tvGenreList = use(tvGenres);
-
-  const fullGenreList = genreAggregation(movieGenreList.data, tvGenreList.data);
+  const fullGenreList = aggregateGenre(
+    movieGenreList.genres,
+    tvGenreList.genres,
+  );
   const genreID = fullGenreList
     .filter((item) => checkGenreName(item, genre))
     .map((item) => item.id);
   const filteredGenre = genreID.join("|");
-  const handleSwitch = (type: string) => {
-    // 3. Wrap state updates in startTransition
-    startTransition(() => {
-      setCatalog(type);
-    });
-  };
-
   return (
     <section
-      className="mt-2 tablet:mt-8"
+      className="tablet:mt-10 desktop-large:max-w-210 desktop:max-w-180 mt-6 w-full place-self-center px-3"
       aria-labelledby={`catalog-${sectionTitle}`}
     >
-      <div className="flex flex-col gap-2 pt-2 pl-3 m-w-180 items-center tablet:flex-row desktop-large:pl-0">
-        <h2 className="text-heading-lg" id={`catalog-${sectionTitle}`}>
+      <div className="tablet:flex-row tablet:items-end tablet:justify-between flex flex-col items-start gap-3">
+        <h2
+          id={`catalog-${sectionTitle}`}
+          className="text-heading-lg section-title"
+        >
           {sectionTitle}
         </h2>
-        <div className="flex" role="tablist" aria-label="Select catalog type">
-          <button
-            className={`w-13 h-6 py-0 px-2 rounded-l-md font-bold tablet:h-5 ${catalog === "movie" ? "bg-cta text-foreground-light" : "bg-cta-secondary text-foreground-dark"} ${isPending ? "opacity-80" : ""}`}
-            onClick={() => handleSwitch("movie")}
-            role="tab"
-            aria-selected={catalog === "movie"}
-            aria-label="List of movies"
-          >
-            Movie
-          </button>
-          <button
-            className={`w-13 h-6 py-1 px-2 rounded-r-md font-bold tablet:h-5 ${catalog === "tv" ? "bg-cta text-foreground-light" : "bg-cta-secondary text-foreground-dark"} ${isPending ? "opacity-80" : ""}`}
-            onClick={() => handleSwitch("tv")}
-            role="tab"
-            aria-selected={catalog === "tv"}
-            aria-label="List of tv shows"
-          >
-            TV
-          </button>
-        </div>
+        <ButtonTabPill
+          options={[
+            { value: "movie", label: "Movie", ariaLabel: "List of movies" },
+            { value: "tv", label: "TV", ariaLabel: "List of tv shows" },
+          ]}
+          value={catalog}
+          onChange={setCatalog}
+
+          ariaLabel="Select catalog type"
+        />
       </div>
       <div
-        className="w-full max-w-180 place-self-center h-42 p-3 relative overflow-y-hidden overflow-x-auto  scroller"
+        className="scroller catalog-row-rail desktop:max-w-180 desktop-large:max-w-210 relative mt-4 h-42 w-full place-self-center overflow-x-auto overflow-y-hidden py-3"
         role="tabpanel"
       >
-        <ul className="flex gap-3 items-center w-full" aria-live="polite">
-          <CardPoster
-            catalog={catalog}
-            filteredGenre={filteredGenre}
-            isPending={isPending}
-          />
+        <ul className="flex w-full items-stretch gap-4 pr-4" aria-live="polite">
+          <CardList catalog={catalog} filteredGenre={filteredGenre} />
         </ul>
       </div>
     </section>

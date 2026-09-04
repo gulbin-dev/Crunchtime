@@ -13,6 +13,7 @@ export async function GET(request: NextRequest) {
         accept: "application/json",
         Authorization: `Bearer ${process.env.Read_Access_Token}`,
       },
+      signal: request.signal,
     },
   );
 

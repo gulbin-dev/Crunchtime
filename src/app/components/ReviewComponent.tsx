@@ -1,34 +1,54 @@
 "use client";
 
-import { FetchResponse, Review } from "@utils/types";
-import Image from "next/image";
-import AvatarPlaceholder from "./UI/AvatarPlaceholder";
 import { useRef, useState, useEffect } from "react";
+import Image from "next/image";
 import useSWR from "swr";
-import { ParamValue } from "next/dist/server/request/params";
 import Link from "next/link";
+import { useInfiniteScroll } from "@hooks/useInfiniteScroll";
+import useFetchPreviewData from "@hooks/useFetchPreviewData";
+import { FetchResponse, Review } from "@utils/types";
 import { avatarPathChecker } from "@utils/avatarPathChecker";
 import { fetcher } from "@utils/swr/fetcher";
+import AvatarPlaceholder from "./UI/AvatarPlaceholder";
 
-export default function ReviewComponent({
-  media,
-  id,
-  reviewID,
-}: {
-  media: ParamValue;
-  id: ParamValue;
-  reviewID?: string;
-}) {
+export default function ReviewComponent({ reviewID }: { reviewID?: string }) {
+  const { params } = useFetchPreviewData();
   const [pageIndex, setPageIndex] = useState(1);
+  const [allReviews, setAllReviews] = useState<Review[]>([]);
+  const [hasMorePages, setHasMorePages] = useState(true);
+  const containerRefs = useRef<Map<string, HTMLDivElement>>(new Map()); // Explicitly typing the Map to handle HTMLDivElement
+  const [isClampedMap, setIsClampedMap] = useState<Record<string, boolean>>({});
+  const { displayedItems, sentinelRef, hasMore } = useInfiniteScroll(
+    allReviews.filter((item) => item.id !== (reviewID || "")),
+    { itemsPerPage: 5 },
+  );
   const { data } = useSWR(
-    `/preview/${media}/${id}/api/review?media=${media}&id=${id}&page=${pageIndex}`,
+    hasMorePages
+      ? `/preview/${params.media}/${params.id}/api/review?media=${params.media}&id=${params.id}&page=${pageIndex}`
+      : null,
     (url) => fetcher<FetchResponse<Review[]>>(url),
-    { suspense: true },
+    {
+      suspense: true,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    },
   );
 
-  // Explicitly typing the Map to handle HTMLDivElement
-  const containerRefs = useRef<Map<string, HTMLDivElement>>(new Map());
-  const [isClampedMap, setIsClampedMap] = useState<Record<string, boolean>>({});
+  // Accumulate reviews from all pages - using render-time state update
+  if (data?.results) {
+    const newReviews = data.results.filter(
+      (item) => !allReviews.some((existing) => existing.id === item.id),
+    );
+    if (newReviews.length > 0) {
+      setAllReviews((prev) => [...prev, ...newReviews]);
+    }
+
+    // Check if there are more pages
+    const totalPages = data.total_pages || 1;
+    if (pageIndex >= totalPages && hasMorePages) {
+      setHasMorePages(false);
+    }
+  }
 
   useEffect(() => {
     const observers: ResizeObserver[] = [];
@@ -59,19 +79,23 @@ export default function ReviewComponent({
     return () => {
       observers.forEach((obs) => obs.disconnect());
     };
-    // FIX: Depend on data so it reruns when SWR fetches new pages or items
-  }, [data]);
+  }, [allReviews]);
 
-  // Safely extract results or fallback to empty array if data isn't fully loaded
-  const reviewsList = data?.results || [];
-  const filteredReviews = reviewsList
-    .slice(0, 5)
-    .filter((item) => item.id !== (reviewID || ""));
+  // Load next page when sentinel is visible and there are more pages
+  useEffect(() => {
+    if (hasMore && hasMorePages && displayedItems.length >= allReviews.length) {
+      // We've displayed all current reviews, load next page
+      const timer = requestAnimationFrame(() => {
+        setPageIndex((prev) => prev + 1);
+      });
+      return () => cancelAnimationFrame(timer);
+    }
+  }, [hasMore, hasMorePages, displayedItems.length, allReviews.length]);
 
   return (
     <>
-      <ul className="list-none p-0 relative px-3">
-        {filteredReviews.map((item) => {
+      <ul className="grid list-none gap-4">
+        {displayedItems.map((item) => {
           const isUpdated = item.updated_at
             ? item.updated_at.length > 0
             : false;
@@ -99,59 +123,63 @@ export default function ReviewComponent({
           return (
             <li
               key={item.id}
-              className="mt-3 border-b border-gray-shade/10 pb-4"
+              className="border-secondary/15 desktop:rounded-[28px] overflow-hidden rounded-none border shadow-[0_20px_60px_-40px_rgba(0,0,0,0.75)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_22px_70px_-38px_rgba(0,165,249,0.18)]"
             >
-              <div className="bg-secondary text-foreground-dark rounded-sm px-2 pt-2 tablet:rounded-xl">
-                {/* FIX: Removed extra trailing '}' from the template string expression */}
-                <Link href={`/preview/${media}/${id}/review/${item.id}`}>
-                  <div className="grid grid-cols-[45px_1fr] gap-3">
-                    {checkerResult ? (
-                      <Image
-                        src={checkerResult}
-                        alt=""
-                        width={45}
-                        height={45}
-                        className="rounded-full h-[45px] object-cover"
-                      />
-                    ) : (
-                      <AvatarPlaceholder />
-                    )}
+              <div className="flex flex-col gap-4 p-3">
+                <Link
+                  href={`/preview/${params.media}/${params.id}/review/${item.id}`}
+                  className="group"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="bg-secondary/10 ring-secondary/20 flex h-8 w-8 items-center justify-center overflow-hidden rounded-full ring-1">
+                      {checkerResult ? (
+                        <Image
+                          src={checkerResult}
+                          alt={item.author || "Reviewer avatar"}
+                          width={56}
+                          height={56}
+                          className="h-full w-full rounded-full object-cover"
+                        />
+                      ) : (
+                        <AvatarPlaceholder />
+                      )}
+                    </div>
 
-                    <div>
-                      <h4 className="font-bold">{item.author}</h4>
-                      {isUpdated ? (
-                        <p className="text-xs flex gap-1 items-center mt-1">
-                          {updateDate}
-                          <span className="italic rounded py-0.2 px-1">
+                    <div className="min-w-0">
+                      <h4 className="text-cta truncate text-base font-semibold transition-colors duration-200 group-hover:underline">
+                        {item.author}
+                      </h4>
+                      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+                        <span className="text-secondary bg-secondary/10 rounded-full px-2 py-1">
+                          {item.author_details.rating !== null
+                            ? item.author_details.rating
+                            : "No rating"}
+                        </span>
+                        <span>{isUpdated ? updateDate : createdDate}</span>
+                        {isUpdated && (
+                          <span className="bg-secondary/15 text-secondary rounded-full px-2 py-1">
                             Updated
                           </span>
-                        </p>
-                      ) : (
-                        <p className="text-xs mt-1">{createdDate}</p>
-                      )}
+                        )}
+                      </div>
                     </div>
                   </div>
                 </Link>
 
                 <div
-                  className="mt-3 pb-3"
+                  className="border-secondary/15 bg-secondary/5 rounded-3xl border p-4 text-sm leading-4"
                   data-id={item.id}
                   ref={(el) => {
                     if (el) containerRefs.current.set(item.id, el);
                     else containerRefs.current.delete(item.id);
                   }}
-                  style={{ lineHeight: "1.5" }}
                 >
-                  {/* FIX: Added 'block' class so element obeys height boundaries */}
-                  <q className="italic text-pretty line-clamp-10">
-                    {item.content}
-                  </q>
+                  <q className="line-clamp-5 italic">{item.content}</q>
 
-                  {/* CONDITIONAL RENDER: Only shows if text overflows line-clamp-10 */}
                   {isClampedMap[item.id] && (
                     <Link
-                      href={`/preview/${media}/${id}/review/${item.id}`}
-                      className="bg-cta text-foreground-dark py-0.5 px-1.5 mt-1 inline-block rounded-2xl"
+                      href={`/preview/${params.media}/${params.id}/review/${item.id}`}
+                      className="bg-secondary hover:bg-secondary/90 mt-4 inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold transition"
                     >
                       Read more
                     </Link>
@@ -162,26 +190,27 @@ export default function ReviewComponent({
           );
         })}
 
-        {filteredReviews.length === 0 && (
-          <p className="italic text-center my-3">No reviews found.</p>
+        {displayedItems.length === 0 && (
+          <li className="rounded-[28px] border border-white/10 bg-white/5 p-6 text-center text-sm">
+            No reviews found.
+          </li>
         )}
       </ul>
 
-      <div className="flex mt-3 justify-center gap-5 pb-3">
-        <button
-          className="bg-cta py-0.5 px-1.5 rounded-md disabled:opacity-50"
-          onClick={() => setPageIndex((prev) => Math.max(prev - 1, 1))}
-          disabled={pageIndex === 1}
+      {hasMore && (
+        <div
+          ref={sentinelRef}
+          className="mt-8 flex justify-center py-4"
+          role="status"
+          aria-label="Loading more reviews"
         >
-          Previous
-        </button>
-        <button
-          className="bg-cta py-0.5 px-1.5 rounded-md"
-          onClick={() => setPageIndex((prev) => prev + 1)}
-        >
-          Next
-        </button>
-      </div>
+          <div className="inline-flex gap-2">
+            <div className="bg-secondary h-2 w-2 animate-bounce rounded-full"></div>
+            <div className="bg-secondary animation-delay-100 h-2 w-2 animate-bounce rounded-full"></div>
+            <div className="bg-secondary animation-delay-200 h-2 w-2 animate-bounce rounded-full"></div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

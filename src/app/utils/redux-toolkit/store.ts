@@ -30,9 +30,6 @@ export const store = configureStore({
       rememberEnhancer(storage, rememberedKeys, {
         prefix: "@crunchtime-",
         serialize: (state) => JSON.stringify(state ?? {}),
-        errorHandler: (error) => {
-          console.error("Error during state persistence:", error);
-        },
       }),
     ),
 });

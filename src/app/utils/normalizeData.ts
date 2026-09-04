@@ -7,6 +7,12 @@ import {
   TVPreview,
 } from "./types";
 
+type NormalizedData = {
+  normalizeTitle: string;
+  runtime?: number;
+  number_of_seasons?: number;
+};
+
 /**
  * @description - Normalizing the prop difference of Movie | TV and  MoviePreview | TVPreview data props
  * @param - Objects from API responses
@@ -14,19 +20,24 @@ import {
  */
 
 //  helper function for both `normalizeData` and `normalizePreviewData` functions
-function helperFunction(data: Movie | TV | MoviePreview | TVPreview) {
-  let normalizeTitle = "";
-  let normalizeMovie = 0;
-  let normalizeTV = 0;
+function helperFunction(
+  data: Movie | TV | MoviePreview | TVPreview,
+): NormalizedData {
   if ("original_title" in data) {
-    normalizeTitle = data.title;
-    normalizeMovie = (data as MoviePreview).runtime;
-    return { normalizeTitle, normalizeMovie };
-  } else if ("original_name" in data) {
-    normalizeTitle = data.name;
-    normalizeTV = (data as TVPreview).number_of_seasons;
-    return { normalizeTitle, normalizeTV };
+    return {
+      normalizeTitle: data.title,
+      ...("runtime" in data && data.runtime !== undefined
+        ? { runtime: data.runtime }
+        : {}),
+    };
   }
+
+  return {
+    normalizeTitle: data.name,
+    ...("number_of_seasons" in data && data.number_of_seasons !== undefined
+      ? { number_of_seasons: data.number_of_seasons }
+      : {}),
+  };
 }
 
 export function normalizeData(data: MediaTypes) {

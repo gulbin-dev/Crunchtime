@@ -39,8 +39,8 @@ export default function ReduxProviderWrapper({
     <Provider store={store}>
       <Rehydrated>
         <SkeletonTheme
-          baseColor="var(--color-cta-secondary)"
-          highlightColor="var(--color-cta)"
+          baseColor="var(--color-secondary)"
+          highlightColor="var(--color-secondary-darker)"
         >
           {children}
         </SkeletonTheme>

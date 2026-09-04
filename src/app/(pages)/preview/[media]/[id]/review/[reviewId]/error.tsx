@@ -1,9 +1,27 @@
 "use client";
-export default function ReviewErrorBoundary({ error }: { error: Error }) {
+
+import Button from "@components/UI/Button";
+export default function ErrorPage({
+  error,
+  unstable_retry,
+}: {
+  error: Error & { digest?: string };
+  unstable_retry: () => void;
+}) {
   return (
-    <div className="w-full h-screen flex flex-col justify-center items-center gap-4">
-      <h2>{error.name}</h2>
+    <div className="flex h-screen flex-col items-center justify-center">
+      <h2>Something went wrong!</h2>
       <p>{error.message}</p>
+      <Button
+        className="mt-5"
+        config={{ type: "primary" }}
+        onClick={
+          // Attempt to recover by re-fetching and re-rendering the segment
+          () => unstable_retry()
+        }
+      >
+        Try again
+      </Button>
     </div>
   );
 }
