@@ -13,19 +13,22 @@ function AuthCallbackContent() {
     fetch(`/api/account/request-token?request_token=${requestToken}`, {
       method: "POST",
     })
-      .then((res) => {
+      .then(async (res) => {
         if (res.redirected) {
           window.location.href = res.url;
-        } else {
-          const contentType = res.headers.get("content-type");
-          if (!contentType || !contentType.includes("application/json")) {
-            throw new Error(
-              `Server returned HTML instead of JSON (${res.status}). Verify API file path.`,
-            );
-          }
-          return res.json().then((data) => {
-            throw new Error(data.error || "Failed to create session");
-          });
+          return;
+        }
+
+        const contentType = res.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new Error(
+            `Server returned HTML instead of JSON (${res.status}). Verify API file path.`,
+          );
+        }
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || "Failed to create session");
         }
       })
       .catch((err) => {
