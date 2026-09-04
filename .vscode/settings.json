@@ -1,4 +1,7 @@
 {
   "telemetry.feedback.enabled": false,
-  "telemetry.editStats.enabled": false
+  "telemetry.editStats.enabled": false,
+  "opilot.completionModel": "",
+  "opilot.enableInlineCompletions": false,
+  "inlineChat.defaultModel": ""
 }
