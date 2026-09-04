@@ -13,7 +13,7 @@ const handleFetchError = <T>(error: unknown, url: string): T => {
       id: `fetch-cancelled-${url}`,
       status: "error",
     });
-    return {} as T;
+    return null as T;
   }
 
   const errorMessage =
@@ -42,7 +42,7 @@ const fetchWithErrorHandling = async <T>(
         id: `fetch-error-${url}`,
         status: "error",
       });
-      return {} as T;
+      return null as T;
     }
     return res.json() as Promise<T>;
   } catch (error) {
