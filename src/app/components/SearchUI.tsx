@@ -2,6 +2,7 @@
 
 import useSWR from "swr";
 import { useState, Suspense, useRef, useEffect, useLayoutEffect } from "react";
+import { useCatalogState } from "@hooks/useCatalogState";
 import { FetchResponse, MediaTypes } from "@utils/types";
 import { normalizeData } from "@utils/normalizeData";
 import { CloseIcon, SadIcon, SearchIcon } from "@utils/tabler-icons";
@@ -11,6 +12,7 @@ import QueryCard from "./QueryCard";
 import LoaderCardPoster from "./UI/LoaderCardPoster";
 import PageLoader from "./UI/PageLoader";
 import Button from "./UI/Button";
+import ButtonTabPill from "./ButtonTabPill";
 
 export default function SearchUI({
   className,
@@ -19,21 +21,19 @@ export default function SearchUI({
   className?: string;
   inputId: string;
 }) {
-  const [query, setQuery] = useState(""),
-    [isMovie, setIsMovie] = useState(true),
-    [isSearchModalOpen, setIsSearchModalOpen] = useState(false),
-    inputRef = useRef<HTMLInputElement | null>(null),
-    dialogRef = useRef<HTMLDialogElement | null>(null),
-    innerContentRef = useRef<HTMLDivElement | null>(null),
-    indicatorRef = useRef<HTMLSpanElement | null>(null),
-    movieTabRef = useRef<HTMLButtonElement | null>(null),
-    tvTabRef = useRef<HTMLButtonElement | null>(null),
-    { data, isLoading, error } = useSWR(
-      query.length > 0
-        ? `/api/search?query=${query}&media=${isMovie ? "movie" : "tv"}`
-        : null,
-      (url: string) => fetcher<FetchResponse<MediaTypes>>(url),
-    );
+  const [query, setQuery] = useState("");
+  const { catalog, setCatalog } = useCatalogState();
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const dialogRef = useRef<HTMLDialogElement | null>(null);
+  const innerContentRef = useRef<HTMLDivElement | null>(null);
+  const indicatorRef = useRef<HTMLSpanElement | null>(null);
+  const movieTabRef = useRef<HTMLButtonElement | null>(null);
+  const tvTabRef = useRef<HTMLButtonElement | null>(null);
+  const { data, isLoading, error } = useSWR(
+    query.length > 0 ? `/api/search?query=${query}&media=${catalog}` : null,
+    (url: string) => fetcher<FetchResponse<MediaTypes>>(url),
+  );
 
   const normalized = data ? normalizeData(data.results) : [];
 
@@ -67,12 +67,12 @@ export default function SearchUI({
   // Slide the segmented indicator under the active tab
   useLayoutEffect(() => {
     if (!isSearchModalOpen) return;
-    const target = isMovie ? movieTabRef.current : tvTabRef.current;
+    const target = catalog === "movie" ? movieTabRef.current : tvTabRef.current;
     const indicator = indicatorRef.current;
     if (!target || !indicator) return;
     indicator.style.left = `${target.offsetLeft}px`;
     indicator.style.width = `${target.offsetWidth}px`;
-  }, [isMovie, isSearchModalOpen]);
+  }, [catalog, isSearchModalOpen]);
 
   useGSAP(() => {
     if (isSearchModalOpen) {
@@ -99,11 +99,14 @@ export default function SearchUI({
     <div className={className}>
       <Button
         onClick={handleOpen}
-        className="mx-3 my-3 flex items-center justify-center gap-0.75 rounded-xl px-3 py-1 font-light shadow-md hover:shadow-lg"
-        ariaLabel="Open search modal"
+        className="relative z-2 m-3 flex items-center justify-center gap-0.75 rounded-xl font-light shadow-md hover:shadow-lg"
+        aria-label="Open search modal"
+        config={{ type: "primary" }}
       >
         <SearchIcon size={18} className="text-white" />
-        <span className="text-white">Find what you want to watch</span>
+        <span className="desktop:block hidden text-white">
+          Find what you want to watch
+        </span>
       </Button>
       <dialog
         ref={dialogRef}
@@ -186,40 +189,24 @@ export default function SearchUI({
                   onChange={(e) => setQuery(e.target.value)}
                 />
               </div>
-
-              {/* Sliding segmented toggle (Movies / TV) */}
-              <div
-                className="tab-pill desktop:col-start-3 desktop:row-start-1 relative col-span-full row-start-2 flex w-full self-start"
-                role="tablist"
-                aria-label="Media type"
-              >
-                <span
-                  ref={indicatorRef}
-                  className="tab-pill__indicator"
-                  style={{ left: 1, width: 0 }}
-                  aria-hidden="true"
-                />
-                <button
-                  ref={movieTabRef}
-                  type="button"
-                  role="tab"
-                  aria-selected={isMovie}
-                  onClick={() => setIsMovie(true)}
-                  className="tab-pill__btn relative z-10 flex-1"
-                >
-                  Movies
-                </button>
-                <button
-                  ref={tvTabRef}
-                  type="button"
-                  role="tab"
-                  aria-selected={!isMovie}
-                  onClick={() => setIsMovie(false)}
-                  className="tab-pill__btn relative z-10 flex-1"
-                >
-                  TV Series
-                </button>
-              </div>
+              <ButtonTabPill
+                options={[
+                  {
+                    value: "movie",
+                    label: "Movies",
+                    ariaLabel: "Search movies",
+                  },
+                  {
+                    value: "tv",
+                    label: "TV Series",
+                    ariaLabel: "Search TV series",
+                  },
+                ]}
+                value={catalog}
+                onChange={() => setCatalog(catalog)}
+                ariaLabel="Media type"
+                buttonClassName="tab-pill__btn relative z-10 flex-1"
+              />
             </div>
           </div>
 
@@ -243,7 +230,7 @@ export default function SearchUI({
                   style={{ animationDelay: `${Math.min(idx, 11) * 35}ms` }}
                 >
                   <Suspense fallback={<LoaderCardPoster />}>
-                    <QueryCard item={item} isMovie={isMovie} />
+                    <QueryCard item={item} catalog={catalog} />
                   </Suspense>
                 </li>
               ))}

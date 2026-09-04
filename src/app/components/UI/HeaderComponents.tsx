@@ -63,7 +63,6 @@ export const SidebarButton = ({
         "<",
       );
   });
-  const handleToggleSidebar = () => setIsToggledMenu((prev) => !prev);
 
   useGSAP(() => {
     // Toggle scrolling on page on small screen
@@ -76,7 +75,7 @@ export const SidebarButton = ({
   return (
     <>
       <button
-        onClick={handleToggleSidebar}
+        onClick={() => setIsToggledMenu((prev) => !prev)}
         className={`relative z-2 flex h-6 w-6 flex-col gap-1 ${className}`}
         aria-label={
           isToggledMenu ? "Close navigation panel" : "Open navigation panel"

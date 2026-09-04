@@ -27,54 +27,54 @@ export default function Header() {
           >
             CrunchTime
           </Link>
-          <SearchUI
-            className="desktop:block hidden"
-            inputId="search-on-desktop-header"
-          />
-          <div className="desktop:grid-cols-[auto_max-content_max-content] desktop:gap-2.5 grid grid-cols-2 grid-rows-1 items-center gap-1.5">
-            {/* Sidebar button */}
-            <SidebarButton
-              className="desktop:hidden col-start-2 row-start-1"
-              isToggledMenu={isToggledMenu}
-              setIsToggledMenu={setIsToggledMenu}
-              sidebarRef={sidebarRef}
-              pathname={pathname}
-              theme={theme}
-            />
-            {/* Navigation */}
-            <nav className="text-heading-sm desktop:text-heading-md desktop:block tablet:mr-3 desktop:col-start-1 hidden">
-              <ul className="flex gap-3">
-                <li>
-                  <Link
-                    className={`${pathname === "/" ? "active" : ""}`}
-                    href="/"
-                    aria-current={pathname === "/" ? "page" : undefined}
-                    data-nav-link // css styling
-                  >
-                    Home
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    className={`${pathname === "/about" ? "active" : ""}`}
-                    href="/about"
-                    aria-current={pathname === "/about" ? "page" : undefined}
-                    data-nav-link // css styling
-                  >
-                    About
-                  </Link>
-                </li>
-              </ul>
-            </nav>
-            {/* Theme toggle button */}
-            <ThemeButton
-              theme={theme}
-              className="desktop:block desktop:col-start-3 hidden"
-            />
-            {/* Account button */}
-            <FeatureFlagWrapper featureFlag="ACCOUNT_FLAG">
-              <Account className="desktop:col-start-2 relative z-2 col-start-1 row-start-1" />
-            </FeatureFlagWrapper>
+          <div className="desktop:justify-between desktop:w-[60%] flex justify-end gap-1.5">
+            {" "}
+            <SearchUI inputId="search-on-desktop-header" />
+            <div className="desktop:gap-2.5 flex items-center gap-1.5">
+              {/* Sidebar button */}
+              <SidebarButton
+                className="desktop:hidden col-start-2 row-start-1"
+                isToggledMenu={isToggledMenu}
+                setIsToggledMenu={setIsToggledMenu}
+                sidebarRef={sidebarRef}
+                pathname={pathname}
+                theme={theme}
+              />
+              {/* Navigation */}
+              <nav className="text-heading-sm desktop:text-heading-md desktop:block tablet:mr-3 desktop:col-start-1 hidden">
+                <ul className="flex gap-3">
+                  <li>
+                    <Link
+                      className={`${pathname === "/" ? "active" : ""}`}
+                      href="/"
+                      aria-current={pathname === "/" ? "page" : undefined}
+                      data-nav-link // css styling
+                    >
+                      Home
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      className={`${pathname === "/about" ? "active" : ""}`}
+                      href="/about"
+                      aria-current={pathname === "/about" ? "page" : undefined}
+                      data-nav-link // css styling
+                    >
+                      About
+                    </Link>
+                  </li>
+                </ul>
+              </nav>
+              {/* Theme toggle button */}
+              <ThemeButton
+                theme={theme}
+                className="desktop:block desktop:col-start-3 hidden"
+              />
+              {/* Account button */}
+              <FeatureFlagWrapper featureFlag="ACCOUNT_FLAG">
+                <Account className="desktop:col-start-2 relative z-2 col-start-1 row-start-1" />
+              </FeatureFlagWrapper>
+            </div>
           </div>
         </div>
       </header>
