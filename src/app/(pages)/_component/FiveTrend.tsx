@@ -11,6 +11,14 @@ import { gsap, useGSAP, Observer, mediaQueries } from "@utils/gsap";
 import useSWR from "swr";
 import { fetcher } from "@utils/swr/fetcher";
 import ThumbnailCards from "./ThumbnailCards";
+import { ImageOffIcon } from "@utils/tabler-icons";
+const FiveTrendFetchError = () => {
+  return (
+    <div className="relative inset-0 h-full bg-stone-700">
+      <ImageOffIcon className="absolute right-5 bottom-5" size={100} />
+    </div>
+  );
+};
 
 export default function FiveTrend() {
   const { data: popular } = useSWR<MediaTypes>("/api/popular", fetcher, {
@@ -24,6 +32,7 @@ export default function FiveTrend() {
   const heroDivRef = useRef<HTMLDivElement | null>(null);
   const selectSlideRef = useRef<(index: number) => void>(() => {});
   const [selectedIndex, setSelectedIndex] = useState(0);
+
   useGSAP(
     () => {
       const trendingList = gsap.utils.toArray<HTMLDivElement>(".five-trend");
@@ -162,8 +171,8 @@ export default function FiveTrend() {
       : [];
   return (
     <div ref={heroDivRef} className="text-foreground-light absolute inset-0">
-      {normalize.map((item) => {
-        return (
+      {normalize.length > 0 ? (
+        normalize.map((item) => (
           <div
             key={item.id}
             className="five-trend absolute inset-0 top-0 left-0 flex h-full w-full"
@@ -178,7 +187,7 @@ export default function FiveTrend() {
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               className="object-cover"
             />
-            <div className="absolute inset-0 z-10 bg-[radial-gradient(circle_at_center,transparent_35%,rgba(0,0,0,0.7)_100%)]" />
+            <div className="bg-foreground-dark/30 desktop:bg-[radial-gradient(circle_at_center,transparent_35%,rgba(0,0,0,0.7)_100%)] absolute inset-0 z-10" />
 
             <div className="tablet:top-45 tablet:left-18 relative top-32 left-3 z-20 w-[90vw]">
               <div className="flex flex-col gap-2">
@@ -206,8 +215,10 @@ export default function FiveTrend() {
               </div>
             </div>
           </div>
-        );
-      })}
+        ))
+      ) : (
+        <FiveTrendFetchError />
+      )}
 
       <ThumbnailCards
         items={normalize.slice(0, 5)}
