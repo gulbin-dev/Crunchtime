@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/gulbin-dev/Crunchtime/compare/v1.0.0...v1.1.0) (2026-09-04)
+
+
+### Features
+
+* Account button is now wrapped in a FeatureFlagWrapper to conditionally render based on ACCOUNT_FLAG. ([e7258ed](https://github.com/gulbin-dev/Crunchtime/commit/e7258edfef4ac0d4e67c12673f9a54d0afef2891))
+
 ## 1.0.0 (2026-06-03)
 
 
