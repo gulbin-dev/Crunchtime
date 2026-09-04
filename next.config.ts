@@ -32,6 +32,21 @@ const nextConfig: NextConfig = {
     process.env.GITHUB_SHA?.slice(0, 32) ||
     "local-build",
   turbopack: {},
+
+  async rewrites() {
+    // If the feature is disabled, rewrite the route to a 404 page
+    if (process.env.NEXT_PUBLIC_FEATURE_CATALOG_FLAG !== "true") {
+      return {
+        beforeFiles: [
+          {
+            source: "/catalog/:path*",
+            destination: "/404",
+          },
+        ],
+      };
+    }
+    return [];
+  },
 };
 
 export default withPlaiceholder(nextConfig);
