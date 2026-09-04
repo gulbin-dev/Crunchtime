@@ -14,6 +14,7 @@ export default function ErrorPage({
       <p>{error.message}</p>
       <Button
         className="mt-5"
+        config={{ type: "primary" }}
         onClick={
           // Attempt to recover by re-fetching and re-rendering the segment
           () => unstable_retry()
