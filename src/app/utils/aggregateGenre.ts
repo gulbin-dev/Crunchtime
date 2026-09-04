@@ -7,11 +7,10 @@ export default function aggregateGenre(
   if (
     !movieGenreData ||
     !tvGenreData ||
-    Object.hasOwn(movieGenreData, "message") ||
-    Object.hasOwn(tvGenreData, "message")
+    (movieGenreData && !Object.hasOwn(movieGenreData, "genres")) ||
+    (tvGenreData && !Object.hasOwn(tvGenreData, "genres"))
   )
     return [];
-
   const mergeData = [...movieGenreData.genres, ...tvGenreData.genres];
   return mergeData.filter(
     (item, index, arr) =>
