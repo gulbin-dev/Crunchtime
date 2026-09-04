@@ -81,8 +81,6 @@ export default function ReviewPage() {
           <h2 className="text-heading-md tablet:mt-3 ml-3">Other reviews</h2>
 
           <ReviewComponent
-            media={params.media}
-            id={params.id}
             reviewID={params.reviewId?.slice(0, -3).toString()}
           />
         </div>
