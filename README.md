@@ -1,8 +1,18 @@
+
+![Movie List Website](https://d2kkupsaj7vt9n9k.public.blob.vercel-storage.com/Crunchtime/poster.png)
 This repository contains a demo website created by Joshua Glenn R. Gulbin.
 
 Joshua Glenn R. Gulbin is a frontend React web developer who focuses on building responsive, user-friendly, and SEO-friendly websites while maintaining a clean codebase.
 
 The website “CrunchTime” uses the TMDB API but is not endorsed, certified, or otherwise approved by TMDB.
+
+## Built with
+
+![Static Badge](https://img.shields.io/badge/Next.js-fff?style=for-the-badge&logo=nextdotjs&logoColor=black)
+![Static Badge](https://img.shields.io/badge/React.js-000?style=for-the-badge&logo=react&logoColor=%2361DAFB&color=white)
+![Static Badge](https://img.shields.io/badge/TypeScript-000?style=for-the-badge&logo=typescript&logoColor=%233178C6&color=white)
+![Static Badge](https://img.shields.io/badge/GSAP-000?style=for-the-badge&logo=gsap&logoColor=%230AE448&color=white)
+![Static Badge](https://img.shields.io/badge/Vercel-000?style=for-the-badge&logo=vercel&logoColor=%23000000&color=white)
 
 ## Credits & Licenses
 
