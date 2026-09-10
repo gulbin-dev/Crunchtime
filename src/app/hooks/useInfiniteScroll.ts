@@ -37,7 +37,10 @@ export function useInfiniteScroll<
         allItems.length === 0 ||
         allItems.length < prevItemsLengthRef.current
       ) {
-        setDisplayedCount(Math.min(itemsPerPage, allItems.length));
+        const handleStateUpdate = () =>
+          setDisplayedCount(Math.min(itemsPerPage, allItems.length));
+
+        handleStateUpdate();
       }
       prevItemsLengthRef.current = allItems.length;
     }
