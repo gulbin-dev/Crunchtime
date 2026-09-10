@@ -5,6 +5,7 @@ import {
   useLayoutEffect,
   useRef,
   useState,
+  memo,
 } from "react";
 import type { CatalogType } from "@hooks/useCatalogState";
 
@@ -23,7 +24,7 @@ interface ButtonTabPillProps {
   buttonClassName?: string;
 }
 
-export default function ButtonTabPill({
+const ButtonTabPill = memo(function ButtonTabPill({
   options,
   value,
   onChange,
@@ -108,4 +109,6 @@ export default function ButtonTabPill({
       ))}
     </div>
   );
-}
+});
+
+export default ButtonTabPill;

@@ -43,7 +43,7 @@ function CardList({
       return (
         <li
           key={item.id}
-          className="card-fade-in relative h-35 min-w-20 rounded-xl"
+          className="card-fade-in tablet:min-w-20 relative min-w-15 rounded-xl"
         >
           <QueryCard item={item} catalog={catalog} />
         </li>

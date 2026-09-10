@@ -45,7 +45,7 @@ export default function Catalog() {
   const [query, setQuery] = useState("");
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<SortOption>("popularity");
-  const { genres: genreData } = useGenres(catalog as "movie" | "tv");
+  const { movieGenres, tvGenres } = useGenres();
 
   // Build API URL with comma-separated genre filters if selected
   const genreParams =
@@ -54,7 +54,7 @@ export default function Catalog() {
 
   const { data, error, isLoading } = useSWR<MediaTypes>(apiUrl, fetcher);
 
-  const genres = genreData?.genres ?? [];
+  const genres = catalog === "movie" ? movieGenres : tvGenres;
   const searchTerm = query.trim().toLowerCase();
 
   // Handle multiple genre selection
@@ -141,7 +141,9 @@ export default function Catalog() {
                   );
                 }}
               >
-                {genres.length === 0 ? (
+                {genres === undefined ? (
+                  <span className="text-dark-shade text-sm">N/A</span>
+                ) : genres.genres.length === 0 ? (
                   <span className="text-dark-shade text-sm">
                     Loading genres...
                   </span>
@@ -163,20 +165,31 @@ export default function Catalog() {
               </button>
               <div className="border-gray-shade/50 absolute top-full left-0 z-10 hidden rounded-lg border bg-white p-3 shadow-lg">
                 <div className="max-h-48 space-y-2 overflow-y-auto">
-                  {genres.map((genre: Genre) => (
-                    <label
-                      key={genre.id}
-                      className="flex cursor-pointer items-center gap-2"
-                    >
+                  {genres === undefined ? (
+                    <label className="flex cursor-pointer items-center gap-2">
                       <input
                         type="checkbox"
-                        checked={selectedGenres.includes(String(genre.id))}
-                        onChange={() => handleGenreToggle(String(genre.id))}
+                        disabled
                         className="h-4 w-4 rounded border-gray-300"
                       />
-                      <span className="text-sm text-black">{genre.name}</span>
+                      <span className="text-sm text-black">N/A</span>
                     </label>
-                  ))}
+                  ) : (
+                    genres.genres.map((genre: Genre) => (
+                      <label
+                        key={genre.id}
+                        className="flex cursor-pointer items-center gap-2"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedGenres.includes(String(genre.id))}
+                          onChange={() => handleGenreToggle(String(genre.id))}
+                          className="h-4 w-4 rounded border-gray-300"
+                        />
+                        <span className="text-sm text-black">{genre.name}</span>
+                      </label>
+                    ))
+                  )}
                 </div>
               </div>
             </div>

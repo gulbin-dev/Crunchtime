@@ -8,7 +8,6 @@ import { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 
 // creates a no-op subscribe function for useSyncExternalStore,
-// as we don't need to subscribe to any external store for this component
 const emptySubscribe = () => () => {};
 
 const getServerSnapshot = () => false; // Server is never "mounted"

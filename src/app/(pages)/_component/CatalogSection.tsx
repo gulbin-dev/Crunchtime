@@ -12,13 +12,9 @@ interface PropType {
 
 export default function CatalogSection({ sectionTitle, genre }: PropType) {
   const { catalog, setCatalog } = useCatalogState();
-  const movieGenreList = useGenres("movie");
-  const tvGenreList = useGenres("tv");
+  const { movieGenres, tvGenres } = useGenres();
 
-  const fullGenreList = aggregateGenre(
-    movieGenreList.genres,
-    tvGenreList.genres,
-  );
+  const fullGenreList = aggregateGenre(movieGenres, tvGenres);
   const genreID = fullGenreList
     .filter((item) => checkGenreName(item, genre))
     .map((item) => item.id);
@@ -48,7 +44,7 @@ export default function CatalogSection({ sectionTitle, genre }: PropType) {
         />
       </div>
       <div
-        className="scroller catalog-row-rail desktop:max-w-180 desktop-large:max-w-210 relative mt-4 h-42 w-full place-self-center overflow-x-auto overflow-y-hidden py-3"
+        className="scroller catalog-row-rail desktop:max-w-180 desktop-large:max-w-210 relative mt-4 min-h-20 w-full place-self-center overflow-x-auto overflow-y-hidden py-3"
         role="tabpanel"
       >
         <ul className="flex w-full items-stretch gap-4 pr-4" aria-live="polite">
