@@ -27,8 +27,7 @@ export default function FiveTrend() {
     revalidateOnFocus: false,
     revalidateOnReconnect: true,
   });
-  const movieGenre = useGenres("movie");
-  const tvGenre = useGenres("tv");
+  const { movieGenres, tvGenres } = useGenres();
   const heroDivRef = useRef<HTMLDivElement | null>(null);
   const selectSlideRef = useRef<(index: number) => void>(() => {});
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -151,7 +150,7 @@ export default function FiveTrend() {
     },
     { scope: heroDivRef, dependencies: [popular] },
   );
-  const genres = aggregateGenre(movieGenre.genres, tvGenre.genres);
+  const genres = aggregateGenre(movieGenres, tvGenres);
   const normalize =
     popular && !Object.hasOwn(popular, "message")
       ? popular
