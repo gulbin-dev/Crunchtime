@@ -1,3 +1,17 @@
+# [2.1.0](https://github.com/gulbin-dev/Crunchtime/compare/v2.0.7...v2.1.0) (2026-09-10)
+
+
+### Bug Fixes
+
+* reduce rerender ([#45](https://github.com/gulbin-dev/Crunchtime/issues/45)) ([d5a8484](https://github.com/gulbin-dev/Crunchtime/commit/d5a84843395b7d27af0457c33780ce47310e2d00))
+* set false on persist-credentials prop and update workflow used ([#47](https://github.com/gulbin-dev/Crunchtime/issues/47)) ([546e30a](https://github.com/gulbin-dev/Crunchtime/commit/546e30af15a3fd5b4d2f32f9808bd1a93d453900))
+* uses custom token ([#46](https://github.com/gulbin-dev/Crunchtime/issues/46)) ([0a55e6a](https://github.com/gulbin-dev/Crunchtime/commit/0a55e6aa52ec5e59998de11469fd84396d6c3180))
+
+
+### Features
+
+* update semantic-release config will now update package and CHANGELOG ([#44](https://github.com/gulbin-dev/Crunchtime/issues/44)) ([8ae29aa](https://github.com/gulbin-dev/Crunchtime/commit/8ae29aad50c27c7be3ef47be4192bc8b2a9686a6))
+
 # Changelog
 
 ## [2.0.1](https://github.com/gulbin-dev/Crunchtime/compare/v1.0.0...v2.0.1) (2026-09-04)
