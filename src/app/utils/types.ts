@@ -100,14 +100,14 @@ interface Credit {
 }
 
 //  Cast data type
-interface Cast extends Credit {
+export interface Cast extends Credit {
   cast_id: number;
   character: string;
   order: number;
 }
 
 //  Crew data type
-interface Crew extends Credit {
+export interface Crew extends Credit {
   department: string;
   job: string;
 }

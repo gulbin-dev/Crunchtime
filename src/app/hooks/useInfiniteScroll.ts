@@ -1,33 +1,51 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 
-interface UseInfiniteScrollOptions {
+interface UseInfiniteScrollOptions<
+  TSentinel extends HTMLElement = HTMLElement,
+> {
   itemsPerPage?: number;
   threshold?: string;
+  rootRef?: RefObject<HTMLElement | null>;
+  sentinelRef?: RefObject<TSentinel | null>;
 }
 
-export function useInfiniteScroll<T>(
-  allItems: T[],
-  options: UseInfiniteScrollOptions = {},
-) {
-  const { itemsPerPage = 5, threshold = "0px 0px -100px 0px" } = options;
+// Notice the explicit default type assignment TSentinel = HTMLElement
+export function useInfiniteScroll<
+  T,
+  TSentinel extends HTMLElement = HTMLElement,
+>(allItems: T[], options: UseInfiniteScrollOptions<TSentinel> = {}) {
+  const {
+    itemsPerPage = 5,
+    threshold = "0px 0px -100px 0px",
+    rootRef,
+    sentinelRef: customSentinelRef,
+  } = options;
 
-  // Use allItems as part of initial state to reset when data changes
-  const [displayedCount, setDisplayedCount] = useState(() => itemsPerPage);
-  const [prevItemsLength, setPrevItemsLength] = useState(allItems.length);
-  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const [displayedCount, setDisplayedCount] = useState(() =>
+    Math.min(itemsPerPage, allItems.length),
+  );
 
-  // When allItems changes, reset the displayed count
-  if (
-    allItems.length !== prevItemsLength &&
-    allItems.length < prevItemsLength
-  ) {
-    setDisplayedCount(itemsPerPage);
-    setPrevItemsLength(allItems.length);
-  }
+  // Use the generic TSentinel type here to match whatever element type is required
+  const internalSentinelRef = useRef<TSentinel | null>(null);
+  const activeSentinelRef = customSentinelRef || internalSentinelRef;
+
+  const prevItemsLengthRef = useRef(allItems.length);
 
   useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel) return;
+    if (allItems.length !== prevItemsLengthRef.current) {
+      if (
+        allItems.length === 0 ||
+        allItems.length < prevItemsLengthRef.current
+      ) {
+        setDisplayedCount(Math.min(itemsPerPage, allItems.length));
+      }
+      prevItemsLengthRef.current = allItems.length;
+    }
+  }, [allItems.length, itemsPerPage]);
+
+  useEffect(() => {
+    const sentinel = activeSentinelRef.current;
+    if (!sentinel || allItems.length === 0) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -39,20 +57,24 @@ export function useInfiniteScroll<T>(
           }
         });
       },
-      { rootMargin: threshold },
+      {
+        root: rootRef?.current ?? null,
+        rootMargin: threshold,
+      },
     );
 
     observer.observe(sentinel);
 
     return () => observer.disconnect();
-  }, [itemsPerPage, threshold, allItems.length]);
+  }, [allItems.length, itemsPerPage, threshold, rootRef, activeSentinelRef]);
 
   const displayedItems = allItems.slice(0, displayedCount);
   const hasMore = displayedCount < allItems.length;
 
   return {
     displayedItems,
-    sentinelRef,
+    // TypeScript will now correctly evaluate the concrete type here
+    sentinelRef: activeSentinelRef,
     hasMore,
     displayedCount,
   };

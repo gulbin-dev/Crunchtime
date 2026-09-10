@@ -18,6 +18,8 @@ export default function ClientDetailsSection() {
     useState(false); // setting toggle state after animation
   const [snapIsToggled, setSnapIsToggled] = useState(false); // setting toggle state after button click
   const sectionRef = useRef<HTMLElement | null>(null);
+  const castListRef = useRef<HTMLUListElement | null>(null);
+  const crewListRef = useRef<HTMLUListElement | null>(null);
   const tween = useRef<gsap.core.Tween | null>(null); // tracking gsap animation between render
   const [isPending, startTransition] = useTransition(); // handle smooth transition between toggles
   useGSAP(
@@ -113,7 +115,10 @@ export default function ClientDetailsSection() {
         </Suspense>
 
         <h3 className="text-heading-lg pt-5">Casts</h3>
-        <ul className="flex w-full gap-2 overflow-x-auto overflow-y-hidden">
+        <ul
+          ref={castListRef}
+          className="flex w-full gap-2 overflow-x-auto overflow-y-hidden scroll-smooth"
+        >
           <Suspense
             fallback={Array.from({ length: 3 }, (_, index) => (
               <li key={index}>
@@ -121,12 +126,15 @@ export default function ClientDetailsSection() {
               </li>
             ))}
           >
-            <Cast />
+            <Cast listRef={castListRef} />
           </Suspense>
         </ul>
 
         <h3 className="text-heading-lg pt-5">Crew</h3>
-        <ul className="flex w-full gap-2 overflow-x-auto overflow-y-hidden">
+        <ul
+          ref={crewListRef}
+          className="flex w-full gap-2 overflow-x-auto overflow-y-hidden scroll-smooth"
+        >
           <Suspense
             fallback={Array.from({ length: 3 }, (_, index) => (
               <li key={index}>
@@ -134,7 +142,7 @@ export default function ClientDetailsSection() {
               </li>
             ))}
           >
-            <Crew />
+            <Crew listRef={crewListRef} />
           </Suspense>
         </ul>
         <div
