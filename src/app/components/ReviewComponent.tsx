@@ -18,7 +18,10 @@ export default function ReviewComponent({ reviewID }: { reviewID?: string }) {
   const [hasMorePages, setHasMorePages] = useState(true);
   const containerRefs = useRef<Map<string, HTMLDivElement>>(new Map()); // Explicitly typing the Map to handle HTMLDivElement
   const [isClampedMap, setIsClampedMap] = useState<Record<string, boolean>>({});
-  const { displayedItems, sentinelRef, hasMore } = useInfiniteScroll(
+  const { displayedItems, sentinelRef, hasMore } = useInfiniteScroll<
+    Review,
+    HTMLDivElement
+  >(
     allReviews.filter((item) => item.id !== (reviewID || "")),
     { itemsPerPage: 5 },
   );
