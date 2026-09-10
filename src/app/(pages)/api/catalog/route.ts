@@ -10,7 +10,12 @@ export async function GET(request: NextRequest) {
   const genre = searchParams.get("genre");
 
   try {
-    const regexGenre = genre?.replace(/\D+/g, "") ?? ""; // explicitly return only number or empty string
+    const genreIds = (genre ?? "")
+      .split(/[|,]/)
+      .map((value) => value.trim())
+      .filter(Boolean)
+      .filter((value) => /^\d+$/.test(value));
+    const regexGenre = genreIds.join("|");
     const media = mediaTypeChecker(mediaType!);
     // 2. Fetch the catalog data from TMDB
     const response = await fetch(
