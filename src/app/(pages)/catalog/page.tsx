@@ -214,7 +214,7 @@ export default function Catalog() {
               { value: "tv", label: "TV", ariaLabel: "List of tv shows" },
             ]}
             value={catalog}
-            onChange={(value) => setCatalog(value)}
+            setCatalog={setCatalog}
             ariaLabel="Select catalog type"
           />
         </div>

@@ -5,6 +5,7 @@ import { useCatalogState } from "@hooks/useCatalogState";
 import { checkGenreName } from "@utils/checkGenreName";
 import aggregateGenre from "@utils/aggregateGenre";
 import ButtonTabPill from "@components/ButtonTabPill";
+
 interface PropType {
   sectionTitle: string;
   genre: string[];
@@ -38,8 +39,8 @@ export default function CatalogSection({ sectionTitle, genre }: PropType) {
             { value: "tv", label: "TV", ariaLabel: "List of tv shows" },
           ]}
           value={catalog}
-          onChange={setCatalog}
-
+          setCatalog={setCatalog}
+          buttonClassName="flex-1"
           ariaLabel="Select catalog type"
         />
       </div>

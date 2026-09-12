@@ -5,7 +5,7 @@ import useSWR from "swr";
 import { MediaTypes } from "@utils/types";
 import { fetcher } from "@utils/swr/fetcher";
 import LoaderCardPoster from "@components/UI/LoaderCardPoster";
-import QueryCard from "@//components/QueryCard";
+import QueryCard from "@components/QueryCard";
 
 function CardList({
   catalog,

@@ -1,17 +1,19 @@
 "use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { useRef, useState } from "react";
-import useGenres from "@hooks/useGenres";
+import useSWR from "swr";
+import ThumbnailCards from "./ThumbnailCards";
 import UI_Brick from "@components/UI/UI_Brick";
+import useGenres from "@hooks/useGenres";
 import { MediaTypes, Movie, TV } from "@utils/types";
 import { RatingIcon } from "@utils/tabler-icons";
 import aggregateGenre from "@utils/aggregateGenre";
 import { gsap, useGSAP, Observer, mediaQueries } from "@utils/gsap";
-import useSWR from "swr";
 import { fetcher } from "@utils/swr/fetcher";
-import ThumbnailCards from "./ThumbnailCards";
 import { ImageOffIcon } from "@utils/tabler-icons";
+
 const FiveTrendFetchError = () => {
   return (
     <div className="relative inset-0 h-full bg-stone-700">
@@ -34,121 +36,125 @@ export default function FiveTrend() {
 
   useGSAP(
     () => {
-      const trendingList = gsap.utils.toArray<HTMLDivElement>(".five-trend");
+      const mm = gsap.matchMedia();
+      mm.add(mediaQueries, (context) => {
+        const { isDesktop } = context.conditions ?? {};
+        const trendingList = gsap.utils.toArray<HTMLDivElement>(".five-trend");
+        if (trendingList.length === 0) return;
+        let currentIndex = 0;
+        let intervalId: NodeJS.Timeout | null = null;
+        let isTweening = false; // Prevents continuous trigger flickers during touch holds
 
-      if (trendingList.length === 0) return;
+        // Set initial positions
+        gsap.set(trendingList, { xPercent: 100 });
+        gsap.set(trendingList[0], { xPercent: 0 });
 
-      let currentIndex = 0;
-      let intervalId: NodeJS.Timeout | null = null;
-      let isTweening = false; // Prevents continuous trigger flickers during touch holds
-      const isDesktop = window.matchMedia(mediaQueries.isDesktop).matches;
+        const transitionTo = (nextIndex: number, direction: number) => {
+          if (isTweening) return;
 
-      // Set initial positions
-      gsap.set(trendingList, { xPercent: 100 });
-      gsap.set(trendingList[0], { xPercent: 0 });
+          // Prevent animating to the exact same slide
+          if (nextIndex === currentIndex) return;
 
-      const transitionTo = (nextIndex: number, direction: number) => {
-        if (isTweening) return;
+          isTweening = true; // Lock interactions during execution
 
-        // Prevent animating to the exact same slide
-        if (nextIndex === currentIndex) return;
+          const currentSlide = trendingList[currentIndex];
+          const nextSlide = trendingList[nextIndex];
 
-        isTweening = true; // Lock interactions during execution
+          const currentEndMove = direction === 1 ? -100 : 100;
+          const nextStartMove = direction === 1 ? 100 : -100;
 
-        const currentSlide = trendingList[currentIndex];
-        const nextSlide = trendingList[nextIndex];
+          // Immediately update index before the animation fires
+          currentIndex = nextIndex;
+          setSelectedIndex(nextIndex);
 
-        const currentEndMove = direction === 1 ? -100 : 100;
-        const nextStartMove = direction === 1 ? 100 : -100;
+          // Pre-position the incoming slide cleanly without triggering flash frames
 
-        // Immediately update index before the animation fires
-        currentIndex = nextIndex;
-        setSelectedIndex(nextIndex);
+          gsap.set(nextSlide, { xPercent: nextStartMove });
 
-        // Pre-position the incoming slide cleanly without triggering flash frames
+          // Use overwrite to kill conflicting animations on these elements cleanly
+          gsap.to(currentSlide, {
+            xPercent: currentEndMove,
+            duration: 0.5,
+            ease: "power2.inOut",
+            overwrite: "auto",
+          });
 
-        gsap.set(nextSlide, { xPercent: nextStartMove });
-
-        // Use overwrite to kill conflicting animations on these elements cleanly
-        gsap.to(currentSlide, {
-          xPercent: currentEndMove,
-          duration: 0.5,
-          ease: "power2.inOut",
-          overwrite: "auto",
-        });
-
-        gsap.to(nextSlide, {
-          xPercent: 0,
-          duration: 0.5,
-          ease: "power2.inOut",
-          overwrite: "auto",
-          onComplete: () => {
-            isTweening = false; // Release the interaction lock safely on completion
-          },
-        });
-      };
-
-      const playNext = (direction: number) => {
-        let nextIndex = currentIndex + direction;
-        if (nextIndex < 0) nextIndex = trendingList.length - 1;
-        if (nextIndex >= trendingList.length) nextIndex = 0;
-
-        transitionTo(nextIndex, direction);
-      };
-
-      selectSlideRef.current = (index) => {
-        if (
-          !isDesktop ||
-          index === currentIndex ||
-          index < 0 ||
-          index >= trendingList.length
-        ) {
-          return;
-        }
-
-        transitionTo(index, index > currentIndex ? 1 : -1);
-      };
-
-      const startAutoplay = () => {
-        intervalId = setInterval(() => {
-          playNext(1);
-        }, 5000);
-      };
-
-      const resetAutoplay = () => {
-        if (intervalId) clearInterval(intervalId);
-        startAutoplay();
-      };
-
-      const obs = !isDesktop
-        ? Observer.create({
-            target: heroDivRef.current,
-            type: "touch,pointer",
-            onLeft: () => {
-              if (isTweening) return; // Prevent interval scrubbing during continuous touch hold
-              playNext(1);
-              resetAutoplay();
+          gsap.to(nextSlide, {
+            xPercent: 0,
+            duration: 0.5,
+            ease: "power2.inOut",
+            overwrite: "auto",
+            onComplete: () => {
+              isTweening = false; // Release the interaction lock safely on completion
             },
-            onRight: () => {
-              if (isTweening) return;
-              playNext(-1);
-              resetAutoplay();
-            },
-            tolerance: 50, // Increased slightly to filter out micro-jitters from fingers
-            preventDefault: false,
-            lockAxis: true,
-          })
-        : null;
+          });
+        };
 
-      if (!isDesktop) startAutoplay();
+        const playNext = (direction: number) => {
+          let nextIndex = currentIndex + direction;
+          if (nextIndex < 0) nextIndex = trendingList.length - 1;
+          if (nextIndex >= trendingList.length) nextIndex = 0;
 
-      return () => {
-        if (intervalId) clearInterval(intervalId);
-        obs?.kill();
-        selectSlideRef.current = () => {};
-      };
+          transitionTo(nextIndex, direction);
+        };
+
+        selectSlideRef.current = (index) => {
+          if (
+            !isDesktop ||
+            index === currentIndex ||
+            index < 0 ||
+            index >= trendingList.length
+          ) {
+            return;
+          }
+
+          transitionTo(index, index > currentIndex ? 1 : -1);
+        };
+
+        const startAutoplay = () => {
+          intervalId = setInterval(() => {
+            playNext(1);
+          }, 5000);
+        };
+
+        const resetAutoplay = () => {
+          if (intervalId) clearInterval(intervalId);
+          startAutoplay();
+        };
+
+        const obs = !isDesktop
+          ? Observer.create({
+              target: heroDivRef.current,
+              type: "touch,pointer",
+              onLeft: () => {
+                if (isTweening) return; // Prevent interval scrubbing during continuous touch hold
+                playNext(1);
+                resetAutoplay();
+              },
+              onRight: () => {
+                if (isTweening) return;
+                playNext(-1);
+                resetAutoplay();
+              },
+              tolerance: 50, // Increased slightly to filter out micro-jitters from fingers
+              preventDefault: false,
+              lockAxis: true,
+            })
+          : null;
+
+        if (!isDesktop) startAutoplay();
+
+        return () => {
+          if (intervalId) clearInterval(intervalId);
+          obs?.kill();
+          selectSlideRef.current = () => {};
+        };
+      });
     },
-    { scope: heroDivRef, dependencies: [popular] },
+    {
+      scope: heroDivRef,
+      dependencies: [popular],
+    },
   );
   const genres = aggregateGenre(movieGenres, tvGenres);
   const normalize =
