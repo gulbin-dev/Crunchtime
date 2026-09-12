@@ -1,3 +1,10 @@
+# [2.2.0](https://github.com/gulbin-dev/Crunchtime/compare/v2.1.0...v2.2.0) (2026-09-12)
+
+
+### Features
+
+* add beta branch deployment ([#49](https://github.com/gulbin-dev/Crunchtime/issues/49)) ([71af9d2](https://github.com/gulbin-dev/Crunchtime/commit/71af9d2a3df471ea35db763dfc6acfdc666e9870)), closes [#Pull](https://github.com/gulbin-dev/Crunchtime/issues/Pull)
+
 # [2.1.0](https://github.com/gulbin-dev/Crunchtime/compare/v2.0.7...v2.1.0) (2026-09-10)
 
 
