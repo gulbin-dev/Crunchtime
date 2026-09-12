@@ -1,3 +1,10 @@
+## [2.2.1-beta.2](https://github.com/gulbin-dev/Crunchtime/compare/v2.2.1-beta.1...v2.2.1-beta.2) (2026-09-12)
+
+
+### Performance Improvements
+
+* improve performance by reducing FPS to 45 and set lag compensation ([51a3718](https://github.com/gulbin-dev/Crunchtime/commit/51a371850fccb1cfa67aa8597a49916c2ccddb2c))
+
 ## [2.2.1-beta.1](https://github.com/gulbin-dev/Crunchtime/compare/v2.2.0...v2.2.1-beta.1) (2026-09-12)
 
 
