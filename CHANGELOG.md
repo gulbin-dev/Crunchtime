@@ -1,3 +1,10 @@
+## [2.2.1-beta.1](https://github.com/gulbin-dev/Crunchtime/compare/v2.2.0...v2.2.1-beta.1) (2026-09-12)
+
+
+### Bug Fixes
+
+* fix issue on catalog button not responding ([847b3e6](https://github.com/gulbin-dev/Crunchtime/commit/847b3e67793a6ef61d238cb2e067cbc2708671ce))
+
 # [2.2.0](https://github.com/gulbin-dev/Crunchtime/compare/v2.1.0...v2.2.0) (2026-09-12)
 
 
