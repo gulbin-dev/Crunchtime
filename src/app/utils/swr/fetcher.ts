@@ -33,13 +33,15 @@ const fetchWithErrorHandling = async <T>(
 ): Promise<T> => {
   try {
     const res = await fetch(url, options);
-    if (res.status >= 500) {
-      toastStatus("An error occurred while fetching the data.", {
-        id: `fetch-error-${url}`,
-        status: "error",
-      });
-      return null as T;
+
+    if (!res.ok) {
+      // Handles 400s, 500s, etc. safely
+      const errorText = await res.text().catch(() => "Unknown error");
+      throw new Error(
+        `Server responded with status ${res.status}: ${errorText}`,
+      );
     }
+
     return res.json() as Promise<T>;
   } catch (error) {
     return handleFetchError<T>(error, url);
