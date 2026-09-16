@@ -1,5 +1,5 @@
 //  common Movie and TV data props
-interface BaseData {
+export interface BaseData {
   adult?: boolean;
   backdrop_path: string | null;
   genre_ids: number[];
@@ -15,6 +15,7 @@ interface BaseData {
     normalizeTitle: string;
     runtime?: number;
     number_of_seasons?: number;
+    genre_names: Genre[] | string;
   };
   blurDataUrl: string;
 }
