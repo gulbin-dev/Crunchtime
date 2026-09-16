@@ -7,7 +7,7 @@ export default function ReviewLoading() {
   return (
     <div
       data-theme={theme}
-      className="h-screen w-full flex items-center justify-center"
+      className="bg-primary flex h-screen w-full items-center justify-center"
     >
       <PageLoader />
     </div>

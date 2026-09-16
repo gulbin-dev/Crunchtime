@@ -1,6 +1,4 @@
 import FiveTrend from "./_component/FiveTrend";
-import { Suspense } from "react";
-import FiveTrendLoader from "@components/UI/FiveTrendLoader";
 import PageWrapper from "./PageWrapper";
 import CatalogSection from "./_component/CatalogSection";
 import Button from "@components/UI/Button";
@@ -15,7 +13,7 @@ import {
   IconStar,
 } from "@tabler/icons-react";
 import FeatureFlagWrapper from "../components/FeatureFlag";
-
+import fetchFiveTrend from "@server/fetchFiveTrend";
 const features = [
   {
     icon: IconCompass,
@@ -62,7 +60,8 @@ const features = [
 ];
 
 export const instant = false;
-export default function Home() {
+export default async function Home() {
+  const fiveTrend = fetchFiveTrend();
   return (
     <PageWrapper>
       <section
@@ -76,9 +75,7 @@ export default function Home() {
           Top 5 Most Popular
         </h2>
 
-        <Suspense fallback={<FiveTrendLoader />}>
-          <FiveTrend />
-        </Suspense>
+        <FiveTrend data={fiveTrend} />
       </section>
 
       <CatalogSection sectionTitle="Trending" genre={[""]} />

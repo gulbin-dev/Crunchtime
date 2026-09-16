@@ -2,10 +2,10 @@
 import { memo } from "react";
 import "react-loading-skeleton/dist/skeleton.css";
 import useSWR from "swr";
-import { MediaTypes } from "@utils/types";
 import { fetcher } from "@utils/swr/fetcher";
 import LoaderCardPoster from "@components/UI/LoaderCardPoster";
-import QueryCard from "@//components/QueryCard";
+import QueryCard from "@components/QueryCard";
+import { CardPosterType } from "@utils/types/modefiedTypes";
 
 function CardList({
   catalog,
@@ -14,12 +14,12 @@ function CardList({
   catalog: string;
   filteredGenre?: string;
 }) {
-  const { data, error, isLoading, isValidating } = useSWR<MediaTypes>(
+  const { data, error, isLoading, isValidating } = useSWR<CardPosterType[]>(
     `/api/catalog?mediaType=${catalog}&genre=${filteredGenre || ""}`,
     fetcher,
     {
       revalidateOnFocus: false,
-      revalidateOnReconnect: false,
+      revalidateOnReconnect: true,
       revalidateIfStale: false,
       dedupingInterval: 60000,
     },

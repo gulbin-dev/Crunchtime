@@ -6,12 +6,13 @@ import useSWR from "swr";
 import Link from "next/link";
 import { useInfiniteScroll } from "@hooks/useInfiniteScroll";
 import useFetchPreviewData from "@hooks/useFetchPreviewData";
-import { FetchResponse, Review } from "@utils/types";
+import { FetchResponse, Review } from "@utils/types/types";
 import { avatarPathChecker } from "@utils/avatarPathChecker";
 import { fetcher } from "@utils/swr/fetcher";
 import AvatarPlaceholder from "./UI/AvatarPlaceholder";
 
 export default function ReviewComponent({ reviewID }: { reviewID?: string }) {
+  const reviewListref = useRef<HTMLUListElement | null>(null);
   const { params } = useFetchPreviewData();
   const [pageIndex, setPageIndex] = useState(1);
   const [allReviews, setAllReviews] = useState<Review[]>([]);
@@ -23,7 +24,7 @@ export default function ReviewComponent({ reviewID }: { reviewID?: string }) {
     HTMLDivElement
   >(
     allReviews.filter((item) => item.id !== (reviewID || "")),
-    { itemsPerPage: 5 },
+    { itemsPerPage: 5, rootRef: reviewListref },
   );
   const { data } = useSWR<FetchResponse<Review[]>>(
     hasMorePages
@@ -88,10 +89,10 @@ export default function ReviewComponent({ reviewID }: { reviewID?: string }) {
   useEffect(() => {
     if (hasMore && hasMorePages && displayedItems.length >= allReviews.length) {
       // We've displayed all current reviews, load next page
-      const timer = requestAnimationFrame(() => {
+      const timer = setTimeout(() => {
         setPageIndex((prev) => prev + 1);
       });
-      return () => cancelAnimationFrame(timer);
+      return () => clearTimeout(timer);
     }
   }, [hasMore, hasMorePages, displayedItems.length, allReviews.length]);
 
@@ -193,7 +194,7 @@ export default function ReviewComponent({ reviewID }: { reviewID?: string }) {
           );
         })}
 
-        {displayedItems.length === 0 && (
+        {displayedItems.length === 0 && !hasMore && (
           <li className="rounded-[28px] border border-white/10 bg-white/5 p-6 text-center text-sm">
             No reviews found.
           </li>

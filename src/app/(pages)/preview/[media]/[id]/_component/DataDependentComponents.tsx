@@ -3,7 +3,7 @@
 /**
  * Separating a data dependent components is neccessary to achive modern loading page look
  */
-import { type RefObject } from "react";
+import { type RefObject, memo } from "react";
 import Image from "next/image";
 import LiteYouTubeEmbed from "react-lite-youtube-embed";
 import CardPosterImagePlaceholder from "@components/UI/CardPosterImagePlaceholder";
@@ -13,13 +13,17 @@ import { useInfiniteScroll } from "@hooks/useInfiniteScroll";
 import useFetchPreviewData from "@hooks/useFetchPreviewData";
 import { LoaderIcon } from "@utils/tabler-icons";
 import { normalizeData } from "@utils/normalizeData";
-import { Cast as CastType, Crew as CrewType, Movie, TV } from "@utils/types";
+import { Cast as CastType, Crew as CrewType } from "@utils/types/types";
+import { PopularResponseType } from "@utils/types/modefiedTypes";
 
-export function YoutubeVideo() {
+/**
+ * Embedding Youtube iFrame
+ */
+const YoutubeVideo = memo(function YoutubeVideo() {
   const { videoTrailer, normalize, isLoading, isValidating } =
     useFetchPreviewData();
   return (
-    <div className="tablet:rounded-lg relative aspect-video overflow-hidden">
+    <div className="tablet:rounded-lg desktop:col-end-8 desktop:row-span-3 relative col-start-1 row-start-1 aspect-video overflow-hidden">
       {videoTrailer ? (
         <LiteYouTubeEmbed
           id={`${videoTrailer.key}`}
@@ -51,17 +55,18 @@ export function YoutubeVideo() {
       )}
     </div>
   );
-}
-export function Overview() {
+});
+
+const Overview = memo(function Overview() {
   const { normalize } = useFetchPreviewData();
   return (
     <p className="mt-3 text-sm leading-4">
       {normalize?.overview ?? "Now available right now"}
     </p>
   );
-}
+});
 
-export function Cast({
+const Cast = memo(function Cast({
   listRef,
 }: {
   listRef: RefObject<HTMLUListElement | null>;
@@ -115,9 +120,9 @@ export function Cast({
       )}
     </>
   );
-}
+});
 
-export function Crew({
+const Crew = memo(function Crew({
   listRef,
 }: {
   listRef: RefObject<HTMLUListElement | null>;
@@ -167,18 +172,23 @@ export function Crew({
       )}
     </>
   );
-}
+});
 
-export function Similar() {
+const SimilarCards = memo(function SimilarCards({
+  panelRef,
+}: {
+  panelRef: React.RefObject<HTMLUListElement | null>;
+}) {
   const { data } = useFetchPreviewData();
   const allSimilarItems = data ? normalizeData(data.similar.results) : [];
 
-  // Explicit generic type parameters can be omitted since our fixed hook
-  // defaults to HTMLElement, matching HTMLDivElement perfectly.
   const { displayedItems, sentinelRef, hasMore } = useInfiniteScroll<
-    Movie | TV,
+    PopularResponseType,
     HTMLDivElement
-  >(allSimilarItems, { itemsPerPage: 5 });
+  >(allSimilarItems, {
+    itemsPerPage: 5,
+    rootRef: panelRef,
+  });
 
   return (
     <>
@@ -190,7 +200,7 @@ export function Similar() {
           return (
             <li
               key={item.id}
-              className="flex w-20 shrink-0 items-center gap-2 py-2"
+              className="relative flex w-20 shrink-0 items-center gap-2 py-2"
             >
               <QueryCard item={item} catalog={catalog} />
             </li>
@@ -200,18 +210,22 @@ export function Similar() {
       {hasMore && <div ref={sentinelRef} className="h-2 w-2" />}
     </>
   );
-}
+});
 
-export function Recommendation() {
+const RecommendationCards = memo(function RecommendationCards({
+  panelRef,
+}: {
+  panelRef: React.RefObject<HTMLUListElement | null>;
+}) {
   const { data } = useFetchPreviewData();
   const allRecommendationItems = data
     ? normalizeData(data.recommendations.results)
     : [];
 
   const { displayedItems, sentinelRef, hasMore } = useInfiniteScroll<
-    Movie | TV,
+    PopularResponseType,
     HTMLDivElement
-  >(allRecommendationItems, { itemsPerPage: 5 });
+  >(allRecommendationItems, { itemsPerPage: 5, rootRef: panelRef });
 
   return (
     <>
@@ -223,7 +237,7 @@ export function Recommendation() {
           return (
             <li
               key={item.id}
-              className="flex w-20 shrink-0 items-center gap-2 py-2"
+              className="relative flex w-20 shrink-0 items-center gap-2 py-2"
             >
               <QueryCard item={item} catalog={catalog} />
             </li>
@@ -233,4 +247,13 @@ export function Recommendation() {
       {hasMore && <div ref={sentinelRef} className="h-2 w-2" />}
     </>
   );
-}
+});
+
+export {
+  YoutubeVideo,
+  Overview,
+  Cast,
+  Crew,
+  SimilarCards,
+  RecommendationCards,
+};

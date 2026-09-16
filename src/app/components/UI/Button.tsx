@@ -1,3 +1,7 @@
+"use client";
+
+import { memo } from "react";
+
 type ButtonProps = React.DetailedHTMLProps<
   React.ButtonHTMLAttributes<HTMLButtonElement>,
   HTMLButtonElement
@@ -9,7 +13,7 @@ type ButtonProps = React.DetailedHTMLProps<
   };
 };
 
-export default function Button({
+const Button = memo(function Button({
   children,
   className,
   config,
@@ -29,4 +33,6 @@ export default function Button({
       {children}
     </button>
   );
-}
+});
+
+export default Button;

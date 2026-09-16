@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useRef, useTransition } from "react";
+import { Suspense, useState, useRef } from "react";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { Cast, Crew, Overview } from "./DataDependentComponents";
@@ -10,59 +10,65 @@ import CardPosterImagePlaceholder from "@components/UI/CardPosterImagePlaceholde
 import Button from "@components/UI/Button";
 import { gsap, useGSAP, mediaQueries } from "@utils/gsap";
 
-/**
- * User interactive component on Preview page
- */
 export default function ClientDetailsSection() {
-  const [transitionToggleShowMore, setTransitionToggleShowMore] =
-    useState(false); // setting toggle state after animation
-  const [snapIsToggled, setSnapIsToggled] = useState(false); // setting toggle state after button click
-  const sectionRef = useRef<HTMLElement | null>(null);
+  const [snapIsToggled, setSnapIsToggled] = useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const castListRef = useRef<HTMLUListElement | null>(null);
   const crewListRef = useRef<HTMLUListElement | null>(null);
-  const tween = useRef<gsap.core.Tween | null>(null); // tracking gsap animation between render
-  const [isPending, startTransition] = useTransition(); // handle smooth transition between toggles
+  const tween = useRef<gsap.core.Timeline | null>(null);
+
+  // handle expansion and contraction animation on toggle
   useGSAP(
     () => {
       const mm = gsap.matchMedia();
       mm.add(mediaQueries, (context) => {
         const { isDesktop } = context.conditions ?? {};
         if (!isDesktop) {
+          // Initialize the CSS Variable custom property values
+          gsap.set(".details__grid-wrapper", { "--accordion-rows": "0fr" });
+
           tween.current = gsap
-            .to(
-              ".details__container",
-
-              {
-                maxHeight: "1500px",
-                duration: 0.8,
-                ease: "power2.out",
-                onComplete: () => {
-                  const stateValue = !transitionToggleShowMore;
-
-                  startTransition(() =>
-                    setTransitionToggleShowMore((prev) => !prev),
-                  );
-                  setSnapIsToggled(stateValue);
-                },
-                onReverseComplete: () => {
-                  const stateValue = transitionToggleShowMore;
-                  startTransition(() =>
-                    setTransitionToggleShowMore((prev) => !prev),
-                  );
-                  setSnapIsToggled(stateValue);
-                },
+            .timeline({
+              onComplete: () => {
+                setSnapIsToggled(true);
               },
+              onReverseComplete: () => {
+                setSnapIsToggled(false);
+              },
+            })
+            .to(".details__grid-wrapper", {
+              "--accordion-rows": "1fr",
+              pointerEvents: "auto",
+              duration: 0.5,
+              ease: "power2.out",
+            })
+            .to(
+              ".action--div__toggle",
+              {
+                keyframes: {
+                  "0%": { autoAlpha: 1 },
+                  "10": { autoAlpha: 0 },
+                  "90": { autoAlpha: 0 },
+                  "100": { autoAlpha: 1 },
+                },
+                duration: 0.5,
+              },
+              "<",
             )
             .paused(true);
+        } else {
+          // Reset custom property on desktop layout modes
+          gsap.set(".details__grid-wrapper", {
+            clearProps: "--accordion-rows",
+          });
         }
       });
     },
-    { scope: sectionRef },
+    { scope: containerRef },
   );
 
   const handleToggle = () => {
-    const stateValue = !transitionToggleShowMore;
-    if (stateValue) {
+    if (!snapIsToggled) {
       tween.current?.play();
     } else {
       tween.current?.reverse();
@@ -70,89 +76,81 @@ export default function ClientDetailsSection() {
   };
 
   return (
-    <section
-      ref={sectionRef}
-      className="desktop:col-start-8 desktop:col-end-13 desktop:row-start-1 desktop:row-span-5 row-start-2"
-    >
-      <div className="details__container tablet:rounded-lg desktop:border bg-secondary/20 border-secondary/60 desktop:rounded-4xl tablet:shadow-2xl tablet:backdrop-blur-xl desktop:max-h-fit desktop:pb-4 relative max-h-50 overflow-hidden p-4 pb-12 shadow-lg backdrop-blur-lg">
+    <>
+      {/* Container holding standard details card layouts */}
+      <div
+        ref={containerRef}
+        className="tablet:rounded-lg desktop:border bg-secondary/20 border-secondary/60 desktop:rounded-4xl tablet:shadow-2xl tablet:backdrop-blur-xl desktop:max-h-fit desktop:pb-4 desktop:col-start-8 desktop:col-end-13 desktop:row-start-1 desktop:row-span-5 relative row-start-2 p-4 pb-12 shadow-lg backdrop-blur-lg"
+      >
+        {/* Persistent top elements always visible */}
         <Suspense
           fallback={
-            <div className="relative grid grid-cols-[max-content_1fr] grid-rows-[auto_auto] gap-x-2">
-              <div className="col-start-1 row-span-full aspect-9/16 h-14 w-10 rounded-lg">
-                <CardPosterImagePlaceholder />
-              </div>
-              <div className="col-start-2 col-end-3 row-start-1 flex flex-col gap-1">
-                <Skeleton width="40%" height={20} />
-                <div className="flex gap-1">
-                  <Skeleton width={38} height={16} />
-                  <Skeleton width={56} height={16} />
-                </div>
-                <ul className="col-start-2 row-start-2 mt-1 flex flex-wrap gap-1">
-                  {Array.from({ length: 3 }, (_, index) => (
-                    <li key={index}>
-                      <Skeleton width={48} height={16} />
-                    </li>
-                  ))}
-                </ul>
-              </div>
+            <div className="h-14 w-10 rounded-lg">
+              <CardPosterImagePlaceholder />
             </div>
           }
         >
           <MediaBanner />
         </Suspense>
+
         <h2 className="text-heading-xl text-secondary mt-5 font-semibold">
           Overview
         </h2>
-        <Suspense
-          fallback={
-            <div className="flex flex-col">
-              <Skeleton count={3} width="80%" height={16} />
-              <Skeleton width="30%" height={16} />
-            </div>
-          }
-        >
+        <Suspense fallback={<Skeleton count={2} width="80%" height={16} />}>
           <Overview />
         </Suspense>
 
-        <h3 className="text-heading-lg pt-5">Casts</h3>
-        <ul
-          ref={castListRef}
-          className="flex w-full gap-2 overflow-x-auto overflow-y-hidden scroll-smooth"
-        >
-          <Suspense
-            fallback={Array.from({ length: 3 }, (_, index) => (
-              <li key={index}>
-                <LoaderCardPoster />
-              </li>
-            ))}
-          >
-            <Cast listRef={castListRef} />
-          </Suspense>
-        </ul>
-
-        <h3 className="text-heading-lg pt-5">Crew</h3>
-        <ul
-          ref={crewListRef}
-          className="flex w-full gap-2 overflow-x-auto overflow-y-hidden scroll-smooth"
-        >
-          <Suspense
-            fallback={Array.from({ length: 3 }, (_, index) => (
-              <li key={index}>
-                <LoaderCardPoster />
-              </li>
-            ))}
-          >
-            <Crew listRef={crewListRef} />
-          </Suspense>
-        </ul>
+        {/* 🚀 PERFORMANT WORKAROUND INNER GRID SYSTEM */}
         <div
-          className={`absolute inset-x-0 flex transition-all duration-300 ${snapIsToggled ? "bottom-2 left-3" : "to-secondary dark:to-secondary-darker desktop:hidden bottom-0 left-0 block justify-center overflow-hidden bg-linear-to-b from-transparent pt-7 pb-3"} ${isPending ? "invisible" : "visible"}`}
+          className="details__grid-wrapper pointer-events-none grid overflow-hidden transition-all duration-75"
+          style={{
+            gridTemplateRows: "var(--accordion-rows, 1fr)",
+            pointerEvents: "none",
+          }}
         >
+          {/* Inner DOM block containing expandable heavy content */}
+          <div className="min-h-0">
+            <h3 className="text-heading-lg pt-5">Casts</h3>
+            <ul
+              ref={castListRef}
+              className="flex w-full gap-2 overflow-x-auto overflow-y-hidden scroll-smooth"
+            >
+              <Suspense
+                fallback={Array.from({ length: 3 }, (_, i) => (
+                  <li key={i}>
+                    <LoaderCardPoster />
+                  </li>
+                ))}
+              >
+                <Cast listRef={castListRef} />
+              </Suspense>
+            </ul>
+
+            <h3 className="text-heading-lg pt-5">Crew</h3>
+            <ul
+              ref={crewListRef}
+              className="flex w-full gap-2 overflow-x-auto overflow-y-hidden scroll-smooth"
+            >
+              <Suspense
+                fallback={Array.from({ length: 3 }, (_, i) => (
+                  <li key={i}>
+                    <LoaderCardPoster />
+                  </li>
+                ))}
+              >
+                <Crew listRef={crewListRef} />
+              </Suspense>
+            </ul>
+          </div>
+        </div>
+
+        {/* Action Toggle Layer */}
+        <div className="action--div__toggle to-secondary dark:to-secondary-darker desktop:hidden absolute inset-x-0 bottom-0 left-0 flex justify-center overflow-hidden bg-linear-to-b from-transparent pt-7 pb-3 transition-all duration-300">
           <Button onClick={handleToggle} config={{ type: "primary" }}>
             {snapIsToggled ? "Show less" : "Show more"}
           </Button>
         </div>
       </div>
-    </section>
+    </>
   );
 }

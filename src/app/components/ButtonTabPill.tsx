@@ -1,11 +1,13 @@
 "use client";
+
 import {
   useCallback,
   useEffect,
-  useLayoutEffect,
   useRef,
   useState,
   memo,
+  Dispatch,
+  SetStateAction,
 } from "react";
 import type { CatalogType } from "@hooks/useCatalogState";
 
@@ -18,7 +20,7 @@ interface TabOption {
 interface ButtonTabPillProps {
   options: TabOption[];
   value: string;
-  onChange: (value: CatalogType) => void;
+  setCatalog: Dispatch<SetStateAction<CatalogType>>;
   ariaLabel?: string;
   className?: string;
   buttonClassName?: string;
@@ -27,49 +29,36 @@ interface ButtonTabPillProps {
 const ButtonTabPill = memo(function ButtonTabPill({
   options,
   value,
-  onChange,
+  setCatalog,
   ariaLabel = "Select option",
-  className = "tab-pill relative self-start",
-  buttonClassName = "tab-pill__btn relative z-10",
+  buttonClassName,
 }: ButtonTabPillProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const indicatorRef = useRef<HTMLSpanElement | null>(null);
-  const [indicator, setIndicator] = useState<{ left: number; width: number }>({
-    left: 0,
-    width: 0,
+  const [indicator, setIndicator] = useState<{ left: number; right: number }>({
+    left: 1,
+    right: 50,
   });
 
-  const updateIndicatorGeometry = useCallback(
-    (selectedValue: string) => {
-      const selectedIndex = options.findIndex(
-        (opt) => opt.value === selectedValue,
-      );
-      const activeBtn = buttonRefs.current[selectedIndex];
-
-      if (!activeBtn || !containerRef.current) return;
-
-      const containerRect = containerRef.current.getBoundingClientRect();
-      const btnRect = activeBtn.getBoundingClientRect();
-
+  const updateIndicatorGeometry = useCallback((selectedValue: string) => {
+    if (selectedValue === "tv") {
       setIndicator({
-        left: btnRect.left - containerRect.left,
-        width: btnRect.width,
+        left: 50,
+        right: 1,
       });
-    },
-    [options],
-  );
+    } else {
+      setIndicator({
+        left: 1,
+        right: 50,
+      });
+    }
+  }, []);
 
   const handleButtonClick = (optionValue: CatalogType) => {
-    if (optionValue === value) return;
     updateIndicatorGeometry(optionValue);
-    onChange(optionValue);
+    setCatalog(optionValue);
   };
-
-  //   Measure initial dimensions on mount
-  useLayoutEffect(() => {
-    updateIndicatorGeometry(value);
-  }, [value, updateIndicatorGeometry]);
 
   // Recalculate on screen resize
   useEffect(() => {
@@ -80,7 +69,7 @@ const ButtonTabPill = memo(function ButtonTabPill({
 
   return (
     <div
-      className={className}
+      className="desktop:col-start-3 tab-pill desktop:row-start-1 relative col-span-full row-start-2 flex gap-1 py-1.5"
       role="tablist"
       aria-label={ariaLabel}
       ref={containerRef}
@@ -89,24 +78,36 @@ const ButtonTabPill = memo(function ButtonTabPill({
         ref={indicatorRef}
         className="tab-pill__indicator absolute transition-all duration-300 ease-out"
         aria-hidden="true"
-        style={{ left: indicator.left, width: indicator.width }}
+        style={{
+          inset: `4px ${indicator.right}% 4px ${indicator.left}%`,
+        }}
       />
-      {options.map((option, index) => (
-        <button
-          key={`tab-${option.value}`}
-          ref={(el) => {
-            buttonRefs.current[index] = el;
-          }}
-          type="button"
-          role="tab"
-          aria-selected={value === option.value}
-          aria-label={option.ariaLabel || option.label}
-          className={buttonClassName}
-          onClick={() => handleButtonClick(option.value)}
-        >
-          <span className="pointer-events-none">{option.label}</span>
-        </button>
-      ))}
+      {options.map((option, index) => {
+        const isSelected = value === option.value;
+
+        return (
+          <button
+            key={`tab-${option.value}`}
+            ref={(el) => {
+              buttonRefs.current[index] = el;
+            }}
+            type="button"
+            role="tab"
+            aria-selected={isSelected}
+            aria-label={option.ariaLabel || option.label}
+            className={`tab-pill__btn relative z-10 ${buttonClassName}`}
+            onClick={() => handleButtonClick(option.value)}
+          >
+            <span
+              className={`pointer-events-none ${
+                isSelected ? "text-foreground-light" : "text-foreground-dark"
+              }`}
+            >
+              {option.label}
+            </span>
+          </button>
+        );
+      })}
     </div>
   );
 });

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { normalizeData } from "@utils/normalizeData";
 import { getPlaiceholder } from "plaiceholder";
 import { mediaTypeChecker } from "@utils/serverPathChecker";
+import { CardPosterType } from "@utils/types/modefiedTypes";
 
 export async function GET(request: NextRequest) {
   // 1. Parse URL search parameters
@@ -17,7 +18,7 @@ export async function GET(request: NextRequest) {
       .filter((value) => /^\d+$/.test(value));
     const regexGenre = genreIds.join("|");
     const media = mediaTypeChecker(mediaType!);
-    // 2. Fetch the catalog data from TMDB
+
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_TMDB_BASE_URL}/discover/${media}?include_adult=false&include_video=false&language=en-US&page=1&sort_by=popularity.desc&with_genres=${regexGenre}`,
       {
@@ -38,30 +39,39 @@ export async function GET(request: NextRequest) {
 
     const data = await response.json();
 
-    // 3. Transform data using your utility functions
     const normalized = data.results ? normalizeData(data.results) : [];
-
-    // FIX: Map to an array of promises
-    const promises = normalized.map(async (item) => {
-      // Safely skip blur generation if backdrop image does not exist
+    let base64 = "";
+    const promises = normalized.map(async (item): Promise<CardPosterType> => {
       if (!item.backdrop_path) {
         return { ...item, blurDataUrl: "" };
       }
 
       try {
-        const buffer = await fetch(
+        const res = await fetch(
           `https://image.tmdb.org/t/p/w300${item.backdrop_path}`,
           { signal: request.signal },
-        ).then(async (res) => Buffer.from(await res.arrayBuffer()));
-
-        const { base64 } = await getPlaiceholder(buffer);
-
-        return { ...item, blurDataUrl: base64 };
+        );
+        if (res.ok) {
+          const arrayBuffer = await res.arrayBuffer();
+          const buffer = Buffer.from(arrayBuffer);
+          const result = await getPlaiceholder(buffer);
+          base64 = result.base64;
+        }
       } catch {
-        return { ...item, blurDataUrl: "" };
+        base64 = "";
       }
-    });
 
+      const sanitized = {
+        id: item.id,
+        normalized: item.normalized,
+        poster_path: item.poster_path,
+        vote_average: item.vote_average,
+        blurDataUrl: base64,
+      };
+      return "name" in item
+        ? { ...sanitized, name: item.name }
+        : { ...sanitized, title: item.title };
+    });
     const dataBuffered = await Promise.all(promises);
 
     // 5. Respond with the processed data structure

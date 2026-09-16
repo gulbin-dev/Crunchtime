@@ -1,14 +1,17 @@
 "use client";
+
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import { normalizePreviewData } from "@utils/normalizeData";
+import { memo } from "react";
 import UI_Brick from "./UI/UI_Brick";
-import { handleRuntime } from "@utils/previewHelpers";
 import CardPosterImagePlaceholder from "./UI/CardPosterImagePlaceholder";
 import { useAppSelector } from "@hooks/redux-typed-hooks";
+import { handleRuntime } from "@utils/previewHelpers";
+import { normalizePreviewData } from "@utils/normalizeData";
 
 import usePreview from "@hooks/usePreviewDetails";
-export default function MediaBanner() {
+
+const MediaBanner = memo(function MediaBanner() {
   const params = useParams();
   const { data } = usePreview(params.media, params.id, {
     suspense: true,
@@ -60,7 +63,7 @@ export default function MediaBanner() {
           <li key={item.id}>
             <UI_Brick
               value={item.name}
-              style="bg-gray-shade/40"
+              className="bg-gray-shade/40"
               aria-label={`${item.name} genre`}
             />
           </li>
@@ -68,4 +71,6 @@ export default function MediaBanner() {
       </ul>
     </div>
   );
-}
+});
+
+export default MediaBanner;

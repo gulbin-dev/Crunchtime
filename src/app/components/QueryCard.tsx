@@ -1,14 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
+import { memo } from "react";
 import CardPosterImagePlaceholder from "@components/UI/CardPosterImagePlaceholder";
-import { Movie, TV } from "@utils/types";
 import { RatingIcon } from "@utils/tabler-icons";
+import { CardPosterType } from "../utils/types/modefiedTypes";
 
-export default function QueryCard({
+const QueryCard = memo(function QueryCard({
   item,
   catalog,
 }: {
-  item: Movie | TV;
+  item: CardPosterType;
   catalog: string;
 }) {
   return (
@@ -16,7 +17,6 @@ export default function QueryCard({
       href={`/preview/${catalog}/${item.id}`}
       aria-label={`View details for ${item.normalized?.normalizeTitle}`}
       className="poster-card focus-ring focus:outline-none"
-      prefetch={false}
     >
       {item.poster_path === null ? (
         <div className="poster-placeholder">
@@ -58,4 +58,6 @@ export default function QueryCard({
       </div>
     </Link>
   );
-}
+});
+
+export default QueryCard;

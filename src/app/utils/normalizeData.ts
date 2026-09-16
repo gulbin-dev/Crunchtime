@@ -1,3 +1,4 @@
+import { PopularResponseType } from "./types/modefiedTypes";
 import {
   Preview,
   MediaTypes,
@@ -5,13 +6,15 @@ import {
   TV,
   MoviePreview,
   TVPreview,
-} from "./types";
+  Genre,
+} from "./types/types";
 
-type NormalizedData = {
+interface NormalizedData {
   normalizeTitle: string;
   runtime?: number;
   number_of_seasons?: number;
-};
+  genre_names: Genre[];
+}
 
 /**
  * @description - Normalizing the prop difference of Movie | TV and  MoviePreview | TVPreview data props
@@ -20,37 +23,44 @@ type NormalizedData = {
  */
 
 //  helper function for both `normalizeData` and `normalizePreviewData` functions
-function helperFunction(
-  data: Movie | TV | MoviePreview | TVPreview,
-): NormalizedData {
-  if ("original_title" in data) {
+
+const helperFunction = (
+  data: Movie | TV | MoviePreview | TVPreview | PopularResponseType,
+  genres?: Genre[],
+): NormalizedData => {
+  const genreNames =
+    genres?.filter((item) => data.genre_ids.includes(item.id)) ?? [];
+  if ("title" in data) {
     return {
       normalizeTitle: data.title,
-      ...("runtime" in data && data.runtime !== undefined
-        ? { runtime: data.runtime }
-        : {}),
+      genre_names: [...genreNames],
+      ...("runtime" in data &&
+        data.runtime !== undefined && { runtime: data.runtime }),
     };
   }
-
   return {
     normalizeTitle: data.name,
+    genre_names: [...genreNames],
     ...("number_of_seasons" in data && data.number_of_seasons !== undefined
       ? { number_of_seasons: data.number_of_seasons }
       : {}),
   };
-}
+};
 
-export function normalizeData(data: MediaTypes) {
+export const normalizeData = (
+  data: MediaTypes | PopularResponseType[] | undefined,
+  aggregateGenre?: Genre[],
+) => {
   if (!data) return [];
   return data.map((data) => {
-    const normalized = helperFunction(data);
-    const result: TV | Movie = { ...data, normalized };
+    const normalized = helperFunction(data, aggregateGenre);
+    const result = { ...data, normalized };
     return result;
   });
-}
+};
 
-export function normalizePreviewData(data: Preview) {
+export const normalizePreviewData = (data: Preview) => {
   const normalized = helperFunction(data);
   const result: Preview = { ...data, normalized };
   return result;
-}
+};

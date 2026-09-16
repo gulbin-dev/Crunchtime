@@ -1,4 +1,4 @@
-import { Genres } from "@utils/types";
+import { Genres } from "@utils/types/types";
 import { NextRequest, NextResponse } from "next/server";
 export async function GET(
   request: NextRequest,
@@ -20,7 +20,6 @@ export async function GET(
   } catch (error: unknown) {
     const errorMessage =
       error instanceof Error ? error.message : "Internal Server Error";
-
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

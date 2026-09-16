@@ -1,3 +1,52 @@
+# [2.3.0-beta.2](https://github.com/gulbin-dev/Crunchtime/compare/v2.3.0-beta.1...v2.3.0-beta.2) (2026-09-16)
+
+
+### Bug Fixes
+
+* fix desktop UI layout ([2c6956c](https://github.com/gulbin-dev/Crunchtime/commit/2c6956c051297a762e942f1b47a14d9bd09a9250))
+
+# [2.3.0-beta.1](https://github.com/gulbin-dev/Crunchtime/compare/v2.2.1-beta.3...v2.3.0-beta.1) (2026-09-16)
+
+
+### Bug Fixes
+
+* fix bug by throwing an error ([88cda65](https://github.com/gulbin-dev/Crunchtime/commit/88cda65a888754743e4f8a1dd9b28515f992301a))
+* use reset() call instead of unstable_retry() ([06c7696](https://github.com/gulbin-dev/Crunchtime/commit/06c76969a5aad386bb4e6e0925f5200414ee6a04))
+* use setTimeout instead of rAF ([7c2214f](https://github.com/gulbin-dev/Crunchtime/commit/7c2214f9de97ecb5312045f3ed50b8552b3102bc))
+
+
+### Features
+
+* add page on fetch ([be8f2f3](https://github.com/gulbin-dev/Crunchtime/commit/be8f2f3a8bad48ff1a675428f919455ec76ef01c))
+
+
+### Performance Improvements
+
+* improve performance by memoizing components and enabling prefetch on Cards ([9144000](https://github.com/gulbin-dev/Crunchtime/commit/914400058f37422e8469c95c938aaeae3035e8ba))
+* reduce unnecessary  recalculation by aggregating genres  on hook function call ([931f7ac](https://github.com/gulbin-dev/Crunchtime/commit/931f7acaed1409ff0fd7da804c19f2c81a14077b))
+* reduce unnecessary re-rendering my memoizing data ([df4bf17](https://github.com/gulbin-dev/Crunchtime/commit/df4bf17ab5b751d5adbfcc7d8b94dcb09a323ae0))
+
+## [2.2.1-beta.3](https://github.com/gulbin-dev/Crunchtime/compare/v2.2.1-beta.2...v2.2.1-beta.3) (2026-09-16)
+
+
+### Performance Improvements
+
+* **details-section:** memoize deeper component's when toggle is clicked ([d0a25e7](https://github.com/gulbin-dev/Crunchtime/commit/d0a25e785caf9a21cfd1d4f1b223148f388f679f))
+
+## [2.2.1-beta.2](https://github.com/gulbin-dev/Crunchtime/compare/v2.2.1-beta.1...v2.2.1-beta.2) (2026-09-12)
+
+
+### Performance Improvements
+
+* improve performance by reducing FPS to 45 and set lag compensation ([51a3718](https://github.com/gulbin-dev/Crunchtime/commit/51a371850fccb1cfa67aa8597a49916c2ccddb2c))
+
+## [2.2.1-beta.1](https://github.com/gulbin-dev/Crunchtime/compare/v2.2.0...v2.2.1-beta.1) (2026-09-12)
+
+
+### Bug Fixes
+
+* fix issue on catalog button not responding ([847b3e6](https://github.com/gulbin-dev/Crunchtime/commit/847b3e67793a6ef61d238cb2e067cbc2708671ce))
+
 # [2.2.0](https://github.com/gulbin-dev/Crunchtime/compare/v2.1.0...v2.2.0) (2026-09-12)
 
 

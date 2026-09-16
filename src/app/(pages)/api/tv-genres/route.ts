@@ -1,4 +1,4 @@
-import { Genres } from "@utils/types";
+import { Genres } from "@utils/types/types";
 import { NextRequest, NextResponse } from "next/server";
 export async function GET(
   request: NextRequest,

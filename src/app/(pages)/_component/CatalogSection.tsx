@@ -3,8 +3,8 @@ import CardList from "./CardList";
 import useGenres from "@hooks/useGenres";
 import { useCatalogState } from "@hooks/useCatalogState";
 import { checkGenreName } from "@utils/checkGenreName";
-import aggregateGenre from "@utils/aggregateGenre";
 import ButtonTabPill from "@components/ButtonTabPill";
+
 interface PropType {
   sectionTitle: string;
   genre: string[];
@@ -12,10 +12,9 @@ interface PropType {
 
 export default function CatalogSection({ sectionTitle, genre }: PropType) {
   const { catalog, setCatalog } = useCatalogState();
-  const { movieGenres, tvGenres } = useGenres();
+  const genres = useGenres();
 
-  const fullGenreList = aggregateGenre(movieGenres, tvGenres);
-  const genreID = fullGenreList
+  const genreID = genres
     .filter((item) => checkGenreName(item, genre))
     .map((item) => item.id);
   const filteredGenre = genreID.join("|");
@@ -38,8 +37,8 @@ export default function CatalogSection({ sectionTitle, genre }: PropType) {
             { value: "tv", label: "TV", ariaLabel: "List of tv shows" },
           ]}
           value={catalog}
-          onChange={setCatalog}
-
+          setCatalog={setCatalog}
+          buttonClassName="flex-1"
           ariaLabel="Select catalog type"
         />
       </div>

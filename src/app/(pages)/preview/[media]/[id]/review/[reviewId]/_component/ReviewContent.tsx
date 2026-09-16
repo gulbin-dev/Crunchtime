@@ -7,7 +7,7 @@ import MediaBanner from "@components/MediaBanner";
 import PageLoader from "@components/UI/PageLoader";
 import ReviewComponent from "@components/ReviewComponent";
 import { fetcher } from "@utils/swr/fetcher";
-import { FetchResponse, Review } from "@utils/types";
+import { FetchResponse, Review } from "@utils/types/types";
 import { BackIcon } from "@utils/tabler-icons";
 
 export default function ReviewContent() {
@@ -18,7 +18,7 @@ export default function ReviewContent() {
   );
   if (!data)
     return (
-      <div className="flex h-screen w-full items-center justify-center">
+      <div className="bg-primary flex h-screen w-full items-center justify-center">
         <PageLoader />
       </div>
     );
@@ -60,7 +60,7 @@ export default function ReviewContent() {
           </h1>
           {isUpdated ? (
             <p className="flex items-center gap-1 text-xs">
-              <span className="bg-gray-shade rounded p-0.5 italic">
+              <span className="bg-gray-shade dark:bg-dark-shade rounded p-1 italic">
                 Updated
               </span>
               {updateDate}

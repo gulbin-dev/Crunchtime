@@ -1,17 +1,16 @@
 "use client";
+
 import Link from "next/link";
 import Image from "next/image";
-import { useRef, useState } from "react";
-import useGenres from "@hooks/useGenres";
-import UI_Brick from "@components/UI/UI_Brick";
-import { MediaTypes, Movie, TV } from "@utils/types";
-import { RatingIcon } from "@utils/tabler-icons";
-import aggregateGenre from "@utils/aggregateGenre";
-import { gsap, useGSAP, Observer, mediaQueries } from "@utils/gsap";
-import useSWR from "swr";
-import { fetcher } from "@utils/swr/fetcher";
+import { useRef, useState, useEffect, use } from "react";
 import ThumbnailCards from "./ThumbnailCards";
+import UI_Brick from "@components/UI/UI_Brick";
+import useGenres from "@hooks/useGenres";
+import { RatingIcon } from "@utils/tabler-icons";
+import { gsap, useGSAP, Observer, mediaQueries } from "@utils/gsap";
 import { ImageOffIcon } from "@utils/tabler-icons";
+import { PopularResponseType } from "@utils/types/modefiedTypes";
+
 const FiveTrendFetchError = () => {
   return (
     <div className="relative inset-0 h-full bg-stone-700">
@@ -20,154 +19,170 @@ const FiveTrendFetchError = () => {
   );
 };
 
-export default function FiveTrend() {
-  const { data: popular } = useSWR<MediaTypes>("/api/popular", fetcher, {
-    suspense: true,
-    revalidateIfStale: false,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: true,
-  });
-  const { movieGenres, tvGenres } = useGenres();
+export default function FiveTrend({
+  data,
+}: {
+  data: Promise<PopularResponseType[]>;
+}) {
+  const popular = use(data);
+  const genres = useGenres();
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [normalize, setNormalize] = useState<PopularResponseType[]>(
+    () => popular || [],
+  );
   const heroDivRef = useRef<HTMLDivElement | null>(null);
   const selectSlideRef = useRef<(index: number) => void>(() => {});
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const workerRef = useRef<Worker | null>(null);
+  const currentSlideRef = useRef<number>(0);
+  const divListRef = useRef<HTMLDivElement[] | null>(null);
 
+  useEffect(() => {
+    if (!popular || !genres || genres.length === 0) return;
+
+    workerRef.current = new Worker(
+      new URL("@workers/normalizeMediaType.worker.ts", import.meta.url),
+      { type: "module" },
+    );
+
+    workerRef.current.onmessage = (event: MessageEvent) => {
+      setNormalize(event.data);
+    };
+    workerRef.current.postMessage({
+      mediaTypes: popular,
+      aggregateGenre: genres,
+    });
+    return () => {
+      workerRef.current?.terminate();
+    };
+  }, [popular, genres]);
+
+  useGSAP(() => {
+    divListRef.current = gsap.utils.toArray<HTMLDivElement>(".five-trend");
+    gsap.set(divListRef.current, { xPercent: 100 });
+    const activeIndex = currentSlideRef.current;
+    if (divListRef.current[activeIndex]) {
+      gsap.set(divListRef.current[activeIndex], { xPercent: 0 });
+    }
+  }, []);
   useGSAP(
     () => {
-      const trendingList = gsap.utils.toArray<HTMLDivElement>(".five-trend");
+      const mm = gsap.matchMedia();
+      mm.add(mediaQueries, (context) => {
+        const { isDesktop } = context.conditions ?? {};
+        if (!divListRef.current) return;
+        let intervalId: NodeJS.Timeout | null = null;
+        let isTweening = false; // Prevents continuous trigger flickers during touch holds
 
-      if (trendingList.length === 0) return;
+        // Set initial positions
 
-      let currentIndex = 0;
-      let intervalId: NodeJS.Timeout | null = null;
-      let isTweening = false; // Prevents continuous trigger flickers during touch holds
-      const isDesktop = window.matchMedia(mediaQueries.isDesktop).matches;
+        const transitionTo = (nextIndex: number, direction: number) => {
+          if (isTweening) return;
 
-      // Set initial positions
-      gsap.set(trendingList, { xPercent: 100 });
-      gsap.set(trendingList[0], { xPercent: 0 });
+          // Prevent animating to the exact same slide
+          if (nextIndex === currentSlideRef.current) return;
 
-      const transitionTo = (nextIndex: number, direction: number) => {
-        if (isTweening) return;
+          isTweening = true; // Lock interactions during execution
 
-        // Prevent animating to the exact same slide
-        if (nextIndex === currentIndex) return;
+          const currentSlide = divListRef.current![currentSlideRef.current];
+          const nextSlide = divListRef.current![nextIndex];
 
-        isTweening = true; // Lock interactions during execution
+          const currentEndMove = direction === 1 ? -100 : 100;
+          const nextStartMove = direction === 1 ? 100 : -100;
 
-        const currentSlide = trendingList[currentIndex];
-        const nextSlide = trendingList[nextIndex];
+          // Immediately update index before the animation fires
+          currentSlideRef.current = nextIndex;
+          setSelectedIndex(nextIndex);
 
-        const currentEndMove = direction === 1 ? -100 : 100;
-        const nextStartMove = direction === 1 ? 100 : -100;
+          // Pre-position the incoming slide cleanly without triggering flash frames
 
-        // Immediately update index before the animation fires
-        currentIndex = nextIndex;
-        setSelectedIndex(nextIndex);
+          gsap.set(nextSlide, { xPercent: nextStartMove });
 
-        // Pre-position the incoming slide cleanly without triggering flash frames
+          // Use overwrite to kill conflicting animations on these elements cleanly
+          gsap.to(currentSlide, {
+            xPercent: currentEndMove,
+            duration: 0.5,
+            ease: "power2.inOut",
+            overwrite: "auto",
+          });
 
-        gsap.set(nextSlide, { xPercent: nextStartMove });
-
-        // Use overwrite to kill conflicting animations on these elements cleanly
-        gsap.to(currentSlide, {
-          xPercent: currentEndMove,
-          duration: 0.5,
-          ease: "power2.inOut",
-          overwrite: "auto",
-        });
-
-        gsap.to(nextSlide, {
-          xPercent: 0,
-          duration: 0.5,
-          ease: "power2.inOut",
-          overwrite: "auto",
-          onComplete: () => {
-            isTweening = false; // Release the interaction lock safely on completion
-          },
-        });
-      };
-
-      const playNext = (direction: number) => {
-        let nextIndex = currentIndex + direction;
-        if (nextIndex < 0) nextIndex = trendingList.length - 1;
-        if (nextIndex >= trendingList.length) nextIndex = 0;
-
-        transitionTo(nextIndex, direction);
-      };
-
-      selectSlideRef.current = (index) => {
-        if (
-          !isDesktop ||
-          index === currentIndex ||
-          index < 0 ||
-          index >= trendingList.length
-        ) {
-          return;
-        }
-
-        transitionTo(index, index > currentIndex ? 1 : -1);
-      };
-
-      const startAutoplay = () => {
-        intervalId = setInterval(() => {
-          playNext(1);
-        }, 5000);
-      };
-
-      const resetAutoplay = () => {
-        if (intervalId) clearInterval(intervalId);
-        startAutoplay();
-      };
-
-      const obs = !isDesktop
-        ? Observer.create({
-            target: heroDivRef.current,
-            type: "touch,pointer",
-            onLeft: () => {
-              if (isTweening) return; // Prevent interval scrubbing during continuous touch hold
-              playNext(1);
-              resetAutoplay();
+          gsap.to(nextSlide, {
+            xPercent: 0,
+            duration: 0.5,
+            ease: "power2.inOut",
+            overwrite: "auto",
+            onComplete: () => {
+              isTweening = false; // Release the interaction lock safely on completion
             },
-            onRight: () => {
-              if (isTweening) return;
-              playNext(-1);
-              resetAutoplay();
-            },
-            tolerance: 50, // Increased slightly to filter out micro-jitters from fingers
-            preventDefault: false,
-            lockAxis: true,
-          })
-        : null;
+          });
+        };
 
-      if (!isDesktop) startAutoplay();
+        const playNext = (direction: number) => {
+          let nextIndex = currentSlideRef.current + direction;
+          if (nextIndex < 0) nextIndex = divListRef.current!.length - 1;
+          if (nextIndex >= divListRef.current!.length) nextIndex = 0;
 
-      return () => {
-        if (intervalId) clearInterval(intervalId);
-        obs?.kill();
-        selectSlideRef.current = () => {};
-      };
+          transitionTo(nextIndex, direction);
+        };
+
+        selectSlideRef.current = (index) => {
+          if (
+            !isDesktop ||
+            index === currentSlideRef.current ||
+            index < 0 ||
+            index >= divListRef.current!.length
+          ) {
+            return;
+          }
+
+          transitionTo(index, index > currentSlideRef.current ? 1 : -1);
+        };
+
+        const startAutoplay = () => {
+          intervalId = setInterval(() => {
+            playNext(1);
+          }, 5000);
+        };
+
+        const resetAutoplay = () => {
+          if (intervalId) clearInterval(intervalId);
+          startAutoplay();
+        };
+
+        const obs = !isDesktop
+          ? Observer.create({
+              target: heroDivRef.current,
+              type: "touch,pointer",
+              onLeft: () => {
+                if (isTweening) return; // Prevent interval scrubbing during continuous touch hold
+                playNext(1);
+                resetAutoplay();
+              },
+              onRight: () => {
+                if (isTweening) return;
+                playNext(-1);
+                resetAutoplay();
+              },
+              tolerance: 50, // Increased slightly to filter out micro-jitters from fingers
+              preventDefault: false,
+              lockAxis: true,
+            })
+          : null;
+
+        if (!isDesktop) startAutoplay();
+
+        return () => {
+          if (intervalId) clearInterval(intervalId);
+          obs?.kill();
+          selectSlideRef.current = () => {};
+        };
+      });
     },
-    { scope: heroDivRef, dependencies: [popular] },
+    {
+      scope: heroDivRef,
+      dependencies: [normalize],
+    },
   );
-  const genres = aggregateGenre(movieGenres, tvGenres);
-  const normalize =
-    popular && !Object.hasOwn(popular, "message")
-      ? popular
-          .sort((a, b) => b.popularity - a.popularity)
-          .slice(0, 5)
-          .map((item) => {
-            const medtype = item.media_type;
-            const title =
-              medtype === "movie" ? (item as Movie).title : (item as TV).name;
-            const genreIds = item.genre_ids;
-            const genreNames = genres
-              .filter((item) => genreIds.includes(item.id))
-              .map((item) => item.name);
 
-            return { ...item, title, genreNames };
-          })
-      : [];
   return (
     <div ref={heroDivRef} className="text-foreground-light absolute inset-0">
       {normalize.length > 0 ? (
@@ -180,7 +195,9 @@ export default function FiveTrend() {
               src={`https://image.tmdb.org/t/p/w1280${item.backdrop_path}`}
               alt=""
               fill
+              fetchPriority="high"
               loading="eager"
+              decoding="async"
               placeholder={item.blurDataUrl ? "blur" : "empty"}
               blurDataURL={item.blurDataUrl}
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -192,13 +209,13 @@ export default function FiveTrend() {
               <div className="flex flex-col gap-2">
                 <UI_Brick
                   value={item.media_type?.toUpperCase() || ""}
-                  ariaLabel="media type"
+                  aria-label="media type"
                 />
                 <Link
                   href={`/preview/${item.media_type}/${item.id}`}
                   className="text-heading-lg underline underline-offset-8"
                 >
-                  {item.title}
+                  {item?.normalized?.normalizeTitle ?? "Loading..."}
                 </Link>
                 <p className="flex items-center gap-0.5">
                   <RatingIcon size={24} aria-label="rating" />
@@ -209,7 +226,9 @@ export default function FiveTrend() {
                   aria-label="list of genres"
                   className="flex grow-0 flex-wrap gap-2"
                 >
-                  <UI_Brick value={item.genreNames} />
+                  <UI_Brick
+                    value={item?.normalized?.genre_names ?? "Loading..."}
+                  />
                 </ul>
               </div>
             </div>
