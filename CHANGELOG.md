@@ -1,3 +1,10 @@
+## [2.2.1-beta.3](https://github.com/gulbin-dev/Crunchtime/compare/v2.2.1-beta.2...v2.2.1-beta.3) (2026-09-16)
+
+
+### Performance Improvements
+
+* **details-section:** memoize deeper component's when toggle is clicked ([d0a25e7](https://github.com/gulbin-dev/Crunchtime/commit/d0a25e785caf9a21cfd1d4f1b223148f388f679f))
+
 ## [2.2.1-beta.2](https://github.com/gulbin-dev/Crunchtime/compare/v2.2.1-beta.1...v2.2.1-beta.2) (2026-09-12)
 
 
