@@ -2,17 +2,14 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useRef, useState } from "react";
-import useSWR from "swr";
+import { useRef, useState, useEffect, use } from "react";
 import ThumbnailCards from "./ThumbnailCards";
 import UI_Brick from "@components/UI/UI_Brick";
 import useGenres from "@hooks/useGenres";
-import { MediaTypes, Movie, TV } from "@utils/types";
 import { RatingIcon } from "@utils/tabler-icons";
-import aggregateGenre from "@utils/aggregateGenre";
 import { gsap, useGSAP, Observer, mediaQueries } from "@utils/gsap";
-import { fetcher } from "@utils/swr/fetcher";
 import { ImageOffIcon } from "@utils/tabler-icons";
+import { PopularResponseType } from "@utils/types/modefiedTypes";
 
 const FiveTrendFetchError = () => {
   return (
@@ -22,49 +19,78 @@ const FiveTrendFetchError = () => {
   );
 };
 
-export default function FiveTrend() {
-  const { data: popular } = useSWR<MediaTypes>("/api/popular", fetcher, {
-    suspense: true,
-    revalidateIfStale: false,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: true,
-  });
-  const { movieGenres, tvGenres } = useGenres();
+export default function FiveTrend({
+  data,
+}: {
+  data: Promise<PopularResponseType[]>;
+}) {
+  const popular = use(data);
+  const genres = useGenres();
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [normalize, setNormalize] = useState<PopularResponseType[]>(
+    () => popular || [],
+  );
   const heroDivRef = useRef<HTMLDivElement | null>(null);
   const selectSlideRef = useRef<(index: number) => void>(() => {});
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const workerRef = useRef<Worker | null>(null);
+  const currentSlideRef = useRef<number>(0);
+  const divListRef = useRef<HTMLDivElement[] | null>(null);
 
+  useEffect(() => {
+    if (!popular || !genres || genres.length === 0) return;
+
+    workerRef.current = new Worker(
+      new URL("@workers/normalizeMediaType.worker.ts", import.meta.url),
+      { type: "module" },
+    );
+
+    workerRef.current.onmessage = (event: MessageEvent) => {
+      setNormalize(event.data);
+    };
+    workerRef.current.postMessage({
+      mediaTypes: popular,
+      aggregateGenre: genres,
+    });
+    return () => {
+      workerRef.current?.terminate();
+    };
+  }, [popular, genres]);
+
+  useGSAP(() => {
+    divListRef.current = gsap.utils.toArray<HTMLDivElement>(".five-trend");
+    gsap.set(divListRef.current, { xPercent: 100 });
+    const activeIndex = currentSlideRef.current;
+    if (divListRef.current[activeIndex]) {
+      gsap.set(divListRef.current[activeIndex], { xPercent: 0 });
+    }
+  }, []);
   useGSAP(
     () => {
       const mm = gsap.matchMedia();
       mm.add(mediaQueries, (context) => {
         const { isDesktop } = context.conditions ?? {};
-        const trendingList = gsap.utils.toArray<HTMLDivElement>(".five-trend");
-        if (trendingList.length === 0) return;
-        let currentIndex = 0;
+        if (!divListRef.current) return;
         let intervalId: NodeJS.Timeout | null = null;
         let isTweening = false; // Prevents continuous trigger flickers during touch holds
 
         // Set initial positions
-        gsap.set(trendingList, { xPercent: 100 });
-        gsap.set(trendingList[0], { xPercent: 0 });
 
         const transitionTo = (nextIndex: number, direction: number) => {
           if (isTweening) return;
 
           // Prevent animating to the exact same slide
-          if (nextIndex === currentIndex) return;
+          if (nextIndex === currentSlideRef.current) return;
 
           isTweening = true; // Lock interactions during execution
 
-          const currentSlide = trendingList[currentIndex];
-          const nextSlide = trendingList[nextIndex];
+          const currentSlide = divListRef.current![currentSlideRef.current];
+          const nextSlide = divListRef.current![nextIndex];
 
           const currentEndMove = direction === 1 ? -100 : 100;
           const nextStartMove = direction === 1 ? 100 : -100;
 
           // Immediately update index before the animation fires
-          currentIndex = nextIndex;
+          currentSlideRef.current = nextIndex;
           setSelectedIndex(nextIndex);
 
           // Pre-position the incoming slide cleanly without triggering flash frames
@@ -91,9 +117,9 @@ export default function FiveTrend() {
         };
 
         const playNext = (direction: number) => {
-          let nextIndex = currentIndex + direction;
-          if (nextIndex < 0) nextIndex = trendingList.length - 1;
-          if (nextIndex >= trendingList.length) nextIndex = 0;
+          let nextIndex = currentSlideRef.current + direction;
+          if (nextIndex < 0) nextIndex = divListRef.current!.length - 1;
+          if (nextIndex >= divListRef.current!.length) nextIndex = 0;
 
           transitionTo(nextIndex, direction);
         };
@@ -101,14 +127,14 @@ export default function FiveTrend() {
         selectSlideRef.current = (index) => {
           if (
             !isDesktop ||
-            index === currentIndex ||
+            index === currentSlideRef.current ||
             index < 0 ||
-            index >= trendingList.length
+            index >= divListRef.current!.length
           ) {
             return;
           }
 
-          transitionTo(index, index > currentIndex ? 1 : -1);
+          transitionTo(index, index > currentSlideRef.current ? 1 : -1);
         };
 
         const startAutoplay = () => {
@@ -153,27 +179,10 @@ export default function FiveTrend() {
     },
     {
       scope: heroDivRef,
-      dependencies: [popular],
+      dependencies: [normalize],
     },
   );
-  const genres = aggregateGenre(movieGenres, tvGenres);
-  const normalize =
-    popular && !Object.hasOwn(popular, "message")
-      ? popular
-          .sort((a, b) => b.popularity - a.popularity)
-          .slice(0, 5)
-          .map((item) => {
-            const medtype = item.media_type;
-            const title =
-              medtype === "movie" ? (item as Movie).title : (item as TV).name;
-            const genreIds = item.genre_ids;
-            const genreNames = genres
-              .filter((item) => genreIds.includes(item.id))
-              .map((item) => item.name);
 
-            return { ...item, title, genreNames };
-          })
-      : [];
   return (
     <div ref={heroDivRef} className="text-foreground-light absolute inset-0">
       {normalize.length > 0 ? (
@@ -186,7 +195,9 @@ export default function FiveTrend() {
               src={`https://image.tmdb.org/t/p/w1280${item.backdrop_path}`}
               alt=""
               fill
+              fetchPriority="high"
               loading="eager"
+              decoding="async"
               placeholder={item.blurDataUrl ? "blur" : "empty"}
               blurDataURL={item.blurDataUrl}
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -198,13 +209,13 @@ export default function FiveTrend() {
               <div className="flex flex-col gap-2">
                 <UI_Brick
                   value={item.media_type?.toUpperCase() || ""}
-                  ariaLabel="media type"
+                  aria-label="media type"
                 />
                 <Link
                   href={`/preview/${item.media_type}/${item.id}`}
                   className="text-heading-lg underline underline-offset-8"
                 >
-                  {item.title}
+                  {item?.normalized?.normalizeTitle ?? "Loading..."}
                 </Link>
                 <p className="flex items-center gap-0.5">
                   <RatingIcon size={24} aria-label="rating" />
@@ -215,7 +226,9 @@ export default function FiveTrend() {
                   aria-label="list of genres"
                   className="flex grow-0 flex-wrap gap-2"
                 >
-                  <UI_Brick value={item.genreNames} />
+                  <UI_Brick
+                    value={item?.normalized?.genre_names ?? "Loading..."}
+                  />
                 </ul>
               </div>
             </div>
