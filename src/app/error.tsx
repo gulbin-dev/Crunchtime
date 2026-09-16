@@ -3,10 +3,10 @@
 import Button from "@components/UI/Button";
 export default function ErrorPage({
   error,
-  unstable_retry,
+  reset,
 }: {
   error: Error & { digest?: string };
-  unstable_retry: () => void;
+  reset: () => void;
 }) {
   return (
     <div className="flex h-screen flex-col items-center justify-center">
@@ -17,7 +17,7 @@ export default function ErrorPage({
         config={{ type: "primary" }}
         onClick={
           // Attempt to recover by re-fetching and re-rendering the segment
-          () => unstable_retry()
+          () => reset()
         }
       >
         Try again
