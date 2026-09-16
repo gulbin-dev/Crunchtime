@@ -14,7 +14,7 @@ import ButtonTabPill from "@components/ButtonTabPill";
 import useGenres from "@hooks/useGenres";
 import { useCatalogState } from "@hooks/useCatalogState";
 import { fetcher } from "@utils/swr/fetcher";
-import { Genre, MediaTypes } from "@utils/types";
+import { Genre, MediaTypes } from "@utils/types/types";
 
 type SortOption = "popularity" | "rating" | "title" | "recent";
 
@@ -45,7 +45,7 @@ export default function Catalog() {
   const [query, setQuery] = useState("");
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<SortOption>("popularity");
-  const { movieGenres, tvGenres } = useGenres();
+  const genres = useGenres();
 
   // Build API URL with comma-separated genre filters if selected
   const genreParams =
@@ -54,7 +54,6 @@ export default function Catalog() {
 
   const { data, error, isLoading } = useSWR<MediaTypes>(apiUrl, fetcher);
 
-  const genres = catalog === "movie" ? movieGenres : tvGenres;
   const searchTerm = query.trim().toLowerCase();
 
   // Handle multiple genre selection
@@ -143,7 +142,7 @@ export default function Catalog() {
               >
                 {genres === undefined ? (
                   <span className="text-dark-shade text-sm">N/A</span>
-                ) : genres.genres.length === 0 ? (
+                ) : genres.length === 0 ? (
                   <span className="text-dark-shade text-sm">
                     Loading genres...
                   </span>
@@ -175,7 +174,7 @@ export default function Catalog() {
                       <span className="text-sm text-black">N/A</span>
                     </label>
                   ) : (
-                    genres.genres.map((genre: Genre) => (
+                    genres.map((genre: Genre) => (
                       <label
                         key={genre.id}
                         className="flex cursor-pointer items-center gap-2"
