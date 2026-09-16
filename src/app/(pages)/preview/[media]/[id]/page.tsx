@@ -22,9 +22,9 @@ export default function PreviewPage() {
         >
           <YoutubeVideo />
         </Suspense>
+        {/* Details */}
+        <ClientDetailsSection />
       </section>
-      {/* Details Section */}
-      <ClientDetailsSection />
 
       <PreviewClientComponent />
     </PageWrapper>
