@@ -1,4 +1,5 @@
 "use client";
+
 import {
   useCallback,
   useEffect,
@@ -41,16 +42,17 @@ const ButtonTabPill = memo(function ButtonTabPill({
   });
 
   const updateIndicatorGeometry = useCallback((selectedValue: string) => {
-    if (selectedValue === "tv")
+    if (selectedValue === "tv") {
       setIndicator({
         left: 50,
         right: 1,
       });
-    else
+    } else {
       setIndicator({
         left: 1,
         right: 50,
       });
+    }
   }, []);
 
   const handleButtonClick = (optionValue: CatalogType) => {
@@ -80,22 +82,32 @@ const ButtonTabPill = memo(function ButtonTabPill({
           inset: `4px ${indicator.right}% 4px ${indicator.left}%`,
         }}
       />
-      {options.map((option, index) => (
-        <button
-          key={`tab-${option.value}`}
-          ref={(el) => {
-            buttonRefs.current[index] = el;
-          }}
-          type="button"
-          role="tab"
-          aria-selected={value === option.value}
-          aria-label={option.ariaLabel || option.label}
-          className={`tab-pill__btn relative z-10 ${buttonClassName}`}
-          onClick={() => handleButtonClick(option.value)}
-        >
-          <span className="pointer-events-none">{option.label}</span>
-        </button>
-      ))}
+      {options.map((option, index) => {
+        const isSelected = value === option.value;
+
+        return (
+          <button
+            key={`tab-${option.value}`}
+            ref={(el) => {
+              buttonRefs.current[index] = el;
+            }}
+            type="button"
+            role="tab"
+            aria-selected={isSelected}
+            aria-label={option.ariaLabel || option.label}
+            className={`tab-pill__btn relative z-10 ${buttonClassName}`}
+            onClick={() => handleButtonClick(option.value)}
+          >
+            <span
+              className={`pointer-events-none ${
+                isSelected ? "text-foreground-light" : "text-foreground-dark"
+              }`}
+            >
+              {option.label}
+            </span>
+          </button>
+        );
+      })}
     </div>
   );
 });
