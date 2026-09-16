@@ -1,3 +1,10 @@
+# [2.3.0-beta.2](https://github.com/gulbin-dev/Crunchtime/compare/v2.3.0-beta.1...v2.3.0-beta.2) (2026-09-16)
+
+
+### Bug Fixes
+
+* fix desktop UI layout ([2c6956c](https://github.com/gulbin-dev/Crunchtime/commit/2c6956c051297a762e942f1b47a14d9bd09a9250))
+
 # [2.3.0-beta.1](https://github.com/gulbin-dev/Crunchtime/compare/v2.2.1-beta.3...v2.3.0-beta.1) (2026-09-16)
 
 
