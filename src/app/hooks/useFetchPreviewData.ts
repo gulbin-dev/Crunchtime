@@ -1,6 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
+import { useMemo } from "react";
 import usePreview from "@hooks/usePreviewDetails";
 import { normalizePreviewData } from "@utils/normalizeData";
 export default function useFetchPreviewData() {
@@ -13,10 +14,27 @@ export default function useFetchPreviewData() {
     },
   );
 
-  const normalize = (data && normalizePreviewData(data)) ?? null;
-  const videoTrailer = normalize
-    ? normalize?.videos?.results.find((v) => v.type === "Trailer")
-    : null;
+  const normalize = useMemo(
+    () => (data && normalizePreviewData(data)) ?? null,
+    [data],
+  );
+  const videoTrailer = useMemo(
+    () =>
+      normalize
+        ? normalize?.videos?.results.find((v) => v.type === "Trailer")
+        : null,
+    [normalize],
+  );
 
-  return { params, data, normalize, videoTrailer, isLoading, isValidating };
+  return useMemo(
+    () => ({
+      params,
+      data,
+      normalize,
+      videoTrailer,
+      isLoading,
+      isValidating,
+    }),
+    [params, data, normalize, videoTrailer, isLoading, isValidating],
+  );
 }
