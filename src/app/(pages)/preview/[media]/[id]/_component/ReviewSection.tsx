@@ -5,7 +5,7 @@ import ReviewComponent from "@components/ReviewComponent";
 const ReviewSection = memo(function ReviewSection() {
   return (
     <section
-      className="panel--section__toggle desktop:col-end-8 desktop:row-span-100 desktop:bg-transparent desktop:border-none desktop:shadow-none inset-0 col-start-1 row-start-1 grid items-start overflow-hidden rounded-xl"
+      className="panel--section__toggle desktop:col-end-8 desktop:-mt-50 desktop:bg-transparent desktop:border-none desktop:shadow-none inset-0 col-start-1 row-start-1 grid items-start overflow-hidden rounded-xl"
       data-view="review"
     >
       <div className="mt-5 flex flex-col gap-3 px-3">

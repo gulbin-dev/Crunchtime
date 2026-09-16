@@ -25,10 +25,29 @@ export default function PreviewClientComponent() {
 
       mm.add(mediaQueries, (context) => {
         const { isDesktop } = context.conditions ?? {};
-
+        const panelList = gsap.utils.toArray<HTMLDivElement>(
+          ".panel--section__toggle",
+          containerRef.current,
+        );
         if (isDesktop) {
           gsap.set(".panel--section__toggle", { clearProps: "all" });
-          return;
+
+          panelList.forEach((panel) => {
+            const isCurrentPanel = panel.dataset.view === toggleView;
+            const reviewPanel = panel.dataset.view === "review";
+
+            if (isCurrentPanel && !reviewPanel) {
+              // animate to view
+              gsap.to(panel, {
+                autoAlpha: 1,
+                pointerEvents: "auto",
+                duration: 0.3,
+                ease: "power2.out",
+              });
+            } else if (!isCurrentPanel && !reviewPanel) {
+              gsap.set(panel, { autoAlpha: 0, pointerEvents: "none" });
+            }
+          });
         }
 
         if (!isDesktop) {
@@ -61,10 +80,10 @@ export default function PreviewClientComponent() {
   return (
     <section
       ref={containerRef}
-      className="desktop:row-start-5 desktop:col-end-13 relative col-start-1 row-span-2 row-start-3 grid grid-cols-subgrid grid-rows-subgrid"
+      className="desktop:col-end-13 desktop:row-start-7 relative col-start-1 row-span-2 row-start-3 grid grid-cols-subgrid grid-rows-[repeat(100,minmax(0,auto))]"
     >
       {/* Tab button list */}
-      <ul className="desktop:hidden relative row-start-1 mx-3 mt-4 flex gap-1.5 overflow-x-auto pb-1.5">
+      <ul className="desktop:col-start-8 desktop:col-end-13 desktop:row-span-2 desktop:row-start-2 relative row-start-1 mx-3 mt-4 flex gap-1.5 overflow-x-auto pb-1.5">
         <li>
           <Button
             config={{
@@ -85,7 +104,7 @@ export default function PreviewClientComponent() {
             Recommended
           </Button>
         </li>
-        <li>
+        <li className="desktop:hidden block">
           <Button
             config={{
               type: toggleView === "review" ? "tab-primary" : "secondary",
@@ -98,13 +117,14 @@ export default function PreviewClientComponent() {
       </ul>
 
       <div
-        className="panel--section__toggle col-start-1 row-start-2 grid items-start"
+        className="panel--section__toggle desktop:row-start-1 desktop:row-span-full desktop:col-span-7 col-start-1 row-start-2 grid grid-cols-subgrid items-start"
         data-view="review"
       >
         <ReviewSection />
       </div>
 
       {/* Similar and Recommendation List */}
+
       <Similar />
       <Recommendation />
     </section>

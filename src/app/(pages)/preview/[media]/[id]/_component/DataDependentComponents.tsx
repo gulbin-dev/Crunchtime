@@ -23,7 +23,7 @@ const YoutubeVideo = memo(function YoutubeVideo() {
   const { videoTrailer, normalize, isLoading, isValidating } =
     useFetchPreviewData();
   return (
-    <div className="tablet:rounded-lg relative aspect-video overflow-hidden">
+    <div className="tablet:rounded-lg desktop:col-end-8 desktop:row-span-3 relative col-start-1 row-start-1 aspect-video overflow-hidden">
       {videoTrailer ? (
         <LiteYouTubeEmbed
           id={`${videoTrailer.key}`}
