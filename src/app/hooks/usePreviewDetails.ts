@@ -1,6 +1,6 @@
 import useSWR from "swr";
 import { fetcher } from "@utils/swr/fetcher";
-import { Preview } from "@utils/types";
+import { Preview } from "@utils/types/types";
 
 interface UsePreviewOptions {
   suspense?: boolean;

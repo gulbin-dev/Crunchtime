@@ -4,7 +4,7 @@ import "react-loading-skeleton/dist/skeleton.css";
 import useSWR from "swr";
 import LoaderCardPoster from "@components/UI/LoaderCardPoster";
 import QueryCard from "@components/QueryCard";
-import { MediaTypes, FetchResponse } from "@utils/types";
+import { MediaTypes, FetchResponse } from "@utils/types/types";
 import { fetcher } from "@utils/swr/fetcher";
 import { SadIcon } from "@utils/tabler-icons";
 import { normalizeData } from "@utils/normalizeData";

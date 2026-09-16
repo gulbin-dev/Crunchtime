@@ -5,7 +5,7 @@ import { useState, useRef, useEffect } from "react";
 import useSWRMutation from "swr/mutation";
 import { useAppSelector } from "@hooks/redux-typed-hooks";
 import { fetcher, deleteRequest } from "@utils/swr/fetcher";
-import { UserAccount } from "@utils/types";
+import { UserAccount } from "@utils/types/types";
 import { AccountIcon } from "@utils/tabler-icons";
 import { gsap, useGSAP } from "@utils/gsap";
 

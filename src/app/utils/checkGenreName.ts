@@ -1,4 +1,4 @@
-import { Genre } from "./types";
+import { Genre } from "./types/types";
 export function checkGenreName(item: Genre, genre: string[]) {
   const hastwoGenres = item.name.match(/&/g);
   if (hastwoGenres) {
