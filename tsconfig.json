@@ -25,7 +25,8 @@
       "@hooks/*": ["./src/app/hooks/*"],
       "@styles/*": ["./src/app/styles/*"],
       "@utils/*": ["./src/app/utils/*"],
-      "@server/*": ["./src/app/server/*"]
+      "@server/*": ["./src/app/server/*"],
+      "@workers/*": ["./src/app/workers/*"]
     }
   },
   "include": [
