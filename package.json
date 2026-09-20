@@ -2,12 +2,14 @@
   "name": "crunchtime",
   "version": "2.3.0-beta.2",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test-eslint": "eslint"
+    "test-eslint": "eslint",
+    "test": "vitest"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
@@ -39,6 +41,8 @@
     "prettier": "^3.9.6",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^4.3.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.1"
   }
 }
