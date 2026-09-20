@@ -41,16 +41,17 @@ const helperFunction = (
   return {
     normalizeTitle: data.name,
     genre_names: [...genreNames],
-    ...("number_of_seasons" in data && data.number_of_seasons !== undefined
-      ? { number_of_seasons: data.number_of_seasons }
-      : {}),
+    ...("number_of_seasons" in data &&
+      data.number_of_seasons !== undefined && {
+        number_of_seasons: data.number_of_seasons,
+      }),
   };
 };
 
 export const normalizeData = (
   data: MediaTypes | PopularResponseType[] | undefined,
   aggregateGenre?: Genre[],
-) => {
+): PopularResponseType[] | never[] => {
   if (!data) return [];
   return data.map((data) => {
     const normalized = helperFunction(data, aggregateGenre);
