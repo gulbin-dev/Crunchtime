@@ -33,7 +33,7 @@ export default function useGenres() {
   return genres;
 }
 
-const aggregateGenre = ({ movie, tv }: ParamType): Genre[] => {
+export const aggregateGenre = ({ movie, tv }: ParamType): Genre[] => {
   const hasMovie = movie && !Object.hasOwn(movie, "error");
   const hasTv = tv && !Object.hasOwn(tv, "error");
 
