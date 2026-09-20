@@ -234,22 +234,10 @@ export type MediaTypes = (Movie | TV)[];
 
 //  discover movie/tv response
 export interface FetchResponse<T> {
-  id?: number;
   page: number;
   results: T;
   total_pages: number;
   total_results: number;
-}
-
-// response on fetching data
-export interface Response<T> {
-  data: T | [];
-  error: {
-    state: boolean;
-    type: string | undefined;
-    status: number | undefined;
-    message: string | undefined;
-  };
 }
 
 // user account

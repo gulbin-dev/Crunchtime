@@ -80,7 +80,7 @@ export default function ClientDetailsSection() {
       {/* Container holding standard details card layouts */}
       <div
         ref={containerRef}
-        className="tablet:rounded-lg desktop:border bg-secondary/20 border-secondary/60 desktop:rounded-4xl tablet:shadow-2xl tablet:backdrop-blur-xl desktop:max-h-fit desktop:pb-4 desktop:col-start-8 desktop:col-end-13 desktop:row-start-1 desktop:row-span-5 relative row-start-2 p-4 pb-12 shadow-lg backdrop-blur-lg"
+        className="tablet:rounded-lg desktop:border bg-secondary/20 border-secondary/60 desktop:rounded-4xl tablet:shadow-2xl tablet:backdrop-blur-xl desktop:min-h-125.5 desktop:max-h-fit desktop:pb-4 desktop:col-start-8 desktop:col-end-13 desktop:row-start-1 desktop:row-span-5 relative row-start-2 p-4 pb-12 shadow-lg backdrop-blur-lg"
       >
         {/* Persistent top elements always visible */}
         <Suspense
@@ -96,7 +96,7 @@ export default function ClientDetailsSection() {
         <h2 className="text-heading-xl text-secondary mt-5 font-semibold">
           Overview
         </h2>
-        <Suspense fallback={<Skeleton count={2} width="80%" height={16} />}>
+        <Suspense fallback={<Skeleton count={4} width="80%" height={16} />}>
           <Overview />
         </Suspense>
 

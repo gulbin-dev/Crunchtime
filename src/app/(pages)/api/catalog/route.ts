@@ -1,3 +1,4 @@
+import { FetchResponse, MediaTypes } from "@utils/types/types";
 import { NextRequest, NextResponse } from "next/server";
 import { normalizeData } from "@utils/normalizeData";
 import { getPlaiceholder } from "plaiceholder";
@@ -37,7 +38,7 @@ export async function GET(request: NextRequest) {
       throw new Error(`TMDB API error status: ${response.status}`);
     }
 
-    const data = await response.json();
+    const data: FetchResponse<MediaTypes> = await response.json();
 
     const normalized = data.results ? normalizeData(data.results) : [];
     let base64 = "";
